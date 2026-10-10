@@ -21,7 +21,7 @@ test('every message is a puff, and the band shows the count on both surfaces', a
   }
   const term = await $.ui.mount({ ...BAND, surface: 'terminal' })
   expect(await term.find({ type: 'Text', text: '3/20' })).toBeDefined()
-  expect(await term.find({ type: 'Text', text: /enjoy the chat/ })).toBeDefined()
+  expect(await term.find({ type: 'Text', text: /Good chat so far/ })).toBeDefined()
   await term.unmount()
 
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
@@ -85,7 +85,7 @@ test('/smoke switches to the joint and back, on both surfaces', async ($, on) =>
 
 test('a joint picked last time comes back in the next session', async ($, on) => {
   mock.clock(on)
-  mock.store(on, { style: 'joint' })
+  mock.store(on, { kind: 'joint' })
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('command.register', () => ({ value: undefined }) as never)
   await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
@@ -141,3 +141,45 @@ for (const [name, env, isAnimated] of [
     await ui.unmount()
   })
 }
+
+test('every message brings a different line', async ($, on) => {
+  mock.clock(on)
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  const seen: string[] = []
+  for (let i = 0; i < 19; i++) {
+    await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+    const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+    const texts = await ui.findAll({ type: 'Text' })
+    seen.push(texts.map(t => t.text).find(t => /^\p{Extended_Pictographic}/u.test(t ?? '')) ?? '')
+    await ui.unmount()
+  }
+  for (let i = 1; i < seen.length; i++) expect(seen[i]).not.toBe(seen[i - 1])
+})
+
+test('/smokear turns the words Arabic and /smokeen turns them back', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  on('session.measure', ($, e) => ({ changed: e.changed }))
+  await $.session.measure({
+    context: { window: 200000 },
+    rateLimits: [{ kind: 'five_hour', percentUsed: 42 }],
+    changed: ['rateLimits'],
+  })
+  const run = (command: string) =>
+    $.command.run({ command, args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
+  expect((await run('smokear')).text).toContain('بالعربي')
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const ui = await $.ui.mount({ ...BAND, surface })
+    expect(await ui.find({ type: 'Text', text: /ولّعنا السيجارة/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'حدّ الـ5 ساعات' })).toBeDefined()
+    await ui.unmount()
+  }
+  const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(JSON.stringify(await desk.drawn())).toContain('سيجارة المحادثة')
+  await desk.unmount()
+
+  expect((await run('smokeen')).text).toContain('English')
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /Cigarette lit/ })).toBeDefined()
+  await ui.unmount()
+})

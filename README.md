@@ -28,15 +28,29 @@ A Claude Code mod for smokers (and everyone else) who want to spend less time at
 |---|---|
 | 🔥 أول الشات | سيجارة جديدة، 20 نَفَس |
 | 💬 كل رسالة منك | نَفَس — السيجارة بتقصر والنقطة بتولّع (الإشعارات ورسائل البرامج ما بتنحسب) |
-| 💬 تحتها | جملة بالإنجليزي بتتغيّر مع كل مرحلة («Just getting started — enjoy the chat»…) |
+| 💬 تحتها | جملة جديدة مع **كل** رسالة (18 جملة: بالأول خفيفة، بالنص «قوم تحرّك»، بالآخر «جهّز حالك ترتاح») |
+| 🌆 السما | بتبلّش غروب وبتغمق لليل مع كل نَفَس، والنجوم بتبيّن أكتر |
 | ⏳ وتحتها | `⏳ 5-hour limit ━━━━━━─────── 42% · resets in 2h 15m` — أخضر ← برتقالي ← أحمر |
 | 🍁 آخر نَفَس | كلود بيجاوبك وبيختم بـ «It's time to get some rest 🍁» + إشعار |
 | 🧹 `/clear` | سيجارة جديدة |
-| 🔁 `/smoke` | بدّل بين السيجارة والجوينت (`/smoke joint` · `/smoke cigarette`) — وبيتذكّر اختيارك للجلسات الجاية |
+| 🔁 `/smoke` | بدّل بين السيجارة والجوينت (`/smoke joint` · `/smoke cigarette`) |
+| 🔤 `/smokear` · `/smokeen` | الكتابة عربي أو إنجليزي (الافتراضي: سيجارة بالإنجليزي) — وكل اختيار بينحفظ للجلسات الجاية |
 
 - **Desktop app:** an animated SVG (smoke, glowing ember, puff dots). On **Windows** it is drawn as a still image: the animated version reloads on every change and blinks out for a moment there.
 - **Terminal:** a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~  7/20` or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`.
-- **Both:** an English status line and the 5-hour limit, `⏳ 5-hour limit ━━━━━━─────── 42% · resets in 2h 15m`.
+- **Both:** a new status line with every message (English by default, `/smokear` for Arabic, `/smokeen` back) and the 5-hour limit, `⏳ 5-hour limit ━━━━━━─────── 42% · resets in 2h 15m`.
+- The sky goes from dusk to night as it burns.
+
+## التحديث — Update
+
+لما ينزل إصدار جديد، من تيرمنال عادي (برّا `claude`):
+
+```bash
+claude plugin marketplace update chat-cigarette
+claude plugin update chat-cigarette@chat-cigarette
+```
+
+وبعدين سكّر Claude وافتحه من جديد.
 
 ## بدك سيجارة أطول أو أقصر؟
 

@@ -7,8 +7,11 @@ export type Limit = { percent: number; resetsAt?: string } | null
 // شو هاد؟ شو عم تدخّن: سيجارة ولا جوينت (بيتبدّل بـ /smoke وبينحفظ بين الجلسات).
 export type Style = 'cigarette' | 'joint'
 
+// شو هاد؟ لغة الكتابة: إنجليزي (الافتراضي) ولا عربي (/smokear · /smokeen).
+export type Lang = 'en' | 'ar'
+
 declare module 'claude-code' {
   interface PluginState {
-    'chat-cigarette': { smoke: Smoke; limit: Limit; style: Style }
+    'chat-cigarette': { smoke: Smoke; limit: Limit; style: Style; lang: Lang }
   }
 }

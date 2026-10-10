@@ -1,10 +1,11 @@
 // شو هاد؟ «سيجارة المحادثة»: أول كل شات بتنولّع سيجارة (أو جوينت — /smoke بيبدّل)
-// فوق خانة الكتابة، وكل رسالة منك لكلود = نَفَس. لما تخلص، كلود بيقلك:
-// It's time to get some rest. ليش؟ تذكير لطيف يخفف قعدة الحاسوب.
+// فوق خانة الكتابة، وكل رسالة منك لكلود = نَفَس، ومع كل نَفَس جملة جديدة.
+// لما تخلص، كلود بيقلك: It's time to get some rest. ليش؟ يخفف قعدة الحاسوب.
+// الكتابة إنجليزي افتراضياً؛ /smokear بيقلبها عربي و /smokeen بيرجّعها إنجليزي.
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
-import type { Limit, Smoke, Style } from '../types'
+import type { Lang, Limit, Smoke, Style } from '../types'
 
 // كم نَفَس بالسيجارة = كم رسالة منك قبل ما تخلص. غيّر الرقم إذا بدك.
 const PUFFS = 20
@@ -17,42 +18,96 @@ const smoke = atom({ plugin: 'chat-cigarette', key: 'smoke' } as const, {
 } as Smoke)
 const limit = atom({ plugin: 'chat-cigarette', key: 'limit' } as const, null as Limit)
 const style = atom({ plugin: 'chat-cigarette', key: 'style' } as const, 'cigarette' as Style)
+const lang = atom({ plugin: 'chat-cigarette', key: 'lang' } as const, 'en' as Lang)
 
 // بس رسائل الإنسان بتنحسب نَفَس — مش إشعارات المهام ولا رسائل البلجنات.
 const HUMAN = new Set(['composer', 'bridge', 'sdk'])
 
-// الجمل بالترتيب: ولّعت · <25% · <50% · <75% · آخر النَّفَسات · خلصت.
-const KINDS: Record<Style, { title: string; noun: string; lines: readonly string[] }> = {
-  cigarette: {
-    title: 'CHAT CIGARETTE',
-    noun: 'cigarette',
-    lines: [
-      '🔥 Cigarette lit — every message is a puff',
+type Lines = { early: readonly string[]; mid: readonly string[]; late: readonly string[] }
+
+// كل نَفَس بياخد جملة غير اللي قبلها، من مجموعة المرحلة (أول التلت · النص · الآخر).
+const LINES: Record<Lang, Lines> = {
+  en: {
+    early: [
       '☕ Just getting started — enjoy the chat',
-      '🌬️ A quarter gone — grab some real fresh air too',
+      '🌤️ Plenty left — take it easy',
+      '🎧 Nice and slow — no rush',
+      '💬 Good chat so far — keep it light',
+      '🪟 Glance out the window — your eyes will thank you',
+      '💧 Sip some water between puffs',
+    ],
+    mid: [
+      '🌬️ Grab some real fresh air too',
+      '🧘 Roll your shoulders, unclench your jaw',
       '⏳ Halfway down — a break is coming up',
+      '👀 Look at something far away for 20 seconds',
+      '🚶 Stretch your legs after this one',
+      '🍃 Slow down — the screen isn’t going anywhere',
+    ],
+    late: [
       '🕯️ Last few puffs — get ready to rest',
-      '🍁 Cigarette burned out — close the screen and go rest',
+      '🌙 Wrapping up soon — save your work',
+      '🔥 Almost down to the end',
+      '📌 Note where you stopped — pick it up tomorrow',
+      '🛏️ Your bed misses you',
+      '⌛ Just a couple left',
     ],
   },
-  joint: {
-    title: 'CHAT JOINT',
-    noun: 'joint',
-    lines: [
-      '🔥 Joint lit — every message is a puff',
-      '😌 Just getting started — chill and enjoy the chat',
-      '🌬️ A quarter gone — grab some real fresh air too',
-      '⏳ Halfway down — a break is coming up',
-      '🕯️ Last few puffs — get ready to rest',
-      '🍁 Joint burned out — close the screen and go rest',
+  ar: {
+    early: [
+      '☕ لسا بالأول… استمتع بالحكي',
+      '🌤️ لسا في كتير — خدها عالهدا',
+      '🎧 عالمهل، ما في إشي مستعجل',
+      '💬 حكي حلو لهلّق — خلّيه خفيف',
+      '🪟 طلّة عالشباك؟ عيونك رح تشكرك',
+      '💧 اشرب شوية مي بين النَّفَس والتاني',
+    ],
+    mid: [
+      '🌬️ خد كمان نفس هوا حقيقي',
+      '🧘 حرّك كتافك وريّح فكّك',
+      '⏳ وصلنا للنص — الاستراحة قرّبت',
+      '👀 طلّع على إشي بعيد 20 ثانية',
+      '🚶 قوم مدّ إجريك بعد هاي',
+      '🍃 عالهدا — الشاشة مش رايحة لمحل',
+    ],
+    late: [
+      '🕯️ آخر كم نَفَس — جهّز حالك ترتاح',
+      '🌙 قرّبنا نخلص — احفظ شغلك',
+      '🔥 قرّبنا للآخر',
+      '📌 سجّل وين وقفت — بتكمّل بكرا',
+      '🛏️ تختك مشتاقلك',
+      '⌛ ضايل كم نَفَس بس',
     ],
   },
 }
 
-function tagline(kind: Style, puffs: number): string {
+const KINDS: Record<Style, { noun: string; title: Record<Lang, string>; lit: Record<Lang, string>; out: Record<Lang, string> }> = {
+  cigarette: {
+    noun: 'cigarette',
+    title: { en: 'CHAT CIGARETTE', ar: 'سيجارة المحادثة' },
+    lit: { en: '🔥 Cigarette lit — every message is a puff', ar: '🔥 ولّعنا السيجارة — كل رسالة منك نَفَس' },
+    out: {
+      en: '🍁 Cigarette burned out — close the screen and go rest',
+      ar: '🍁 خلصت السيجارة… سكّر الشاشة وروح ارتاح',
+    },
+  },
+  joint: {
+    noun: 'joint',
+    title: { en: 'CHAT JOINT', ar: 'جوينت المحادثة' },
+    lit: { en: '🔥 Joint lit — every message is a puff', ar: '🔥 ولّعنا الجوينت — كل رسالة منك نَفَس' },
+    out: {
+      en: '🍁 Joint burned out — close the screen and go rest',
+      ar: '🍁 خلص الجوينت… سكّر الشاشة وروح ارتاح',
+    },
+  },
+}
+
+function tagline(kind: Style, ln: Lang, puffs: number): string {
+  if (puffs === 0) return KINDS[kind].lit[ln]
+  if (puffs >= PUFFS) return KINDS[kind].out[ln]
   const f = puffs / PUFFS
-  const i = f >= 1 ? 5 : puffs === 0 ? 0 : f < 0.25 ? 1 : f < 0.5 ? 2 : f < 0.75 ? 3 : 4
-  return KINDS[kind].lines[i] ?? ''
+  const pool = LINES[ln][f < 1 / 3 ? 'early' : f < 2 / 3 ? 'mid' : 'late']
+  return pool[puffs % pool.length] ?? ''
 }
 
 // آخر نَفَس: كلود نفسه بيقلك تروح ترتاح.
@@ -71,12 +126,16 @@ function limitColor(pct: number): string {
   return pct < 50 ? '#5fd3a5' : pct < 80 ? '#ffb347' : '#ff5a5f'
 }
 
-// «resets in 2h 15m» — فاضي إذا ما في وقت تجديد.
-function resetsIn(lim: Exclude<Limit, null>, now: number): string {
+const LIMIT_LABEL: Record<Lang, string> = { en: '⏳ 5-hour limit', ar: '⏳ حدّ الـ5 ساعات' }
+
+// «resets in 2h 15m» / «بيتجدد بعد 2س 15د» — فاضي إذا ما في وقت تجديد.
+function resetsIn(lim: Exclude<Limit, null>, now: number, ln: Lang): string {
   const at = lim.resetsAt ? Date.parse(lim.resetsAt) : NaN
   if (!Number.isFinite(at) || at <= now) return ''
   const mins = Math.round((at - now) / 60000)
-  return `resets in ${Math.floor(mins / 60)}h ${mins % 60}m`
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  return ln === 'ar' ? `بيتجدد بعد ${h}س ${m}د` : `resets in ${h}h ${m}m`
 }
 
 const LIMIT_CELLS = 14
@@ -85,7 +144,9 @@ const LIMIT_CELLS = 14
 
 const FONT = "ui-sans-serif, -apple-system, 'Helvetica Neue', sans-serif"
 
-function stars(): string {
+// النجوم بتبيّن أكتر كل ما الليل ينزل (night من 0 لـ1).
+function stars(night: number): string {
+  const peak = (0.35 + 0.65 * night).toFixed(2)
   const pts = [
     [64, 14, 0.9, 0],
     [150, 30, 0.6, 1.2],
@@ -100,7 +161,7 @@ function stars(): string {
   return pts
     .map(
       ([x, y, r, b]) =>
-        `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff7d6"><animate attributeName="opacity" values=".15;1;.15" dur="3.2s" begin="${b}s" repeatCount="indefinite"/></circle>`,
+        `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff7d6"><animate attributeName="opacity" values=".1;${peak};.1" dur="3.2s" begin="${b}s" repeatCount="indefinite"/></circle>`,
     )
     .join('')
 }
@@ -126,9 +187,17 @@ function leaf(x: number, y: number, size: number, begin: number, dur: number): s
   )
 }
 
-function defs(): string {
+// لون من a لـ b حسب t (0..1).
+function mix(a: string, b: string, t: number): string {
+  const ch = (c: string, i: number) => parseInt(c.slice(1 + 2 * i, 3 + 2 * i), 16)
+  const out = [0, 1, 2].map(i => Math.round(ch(a, i) + (ch(b, i) - ch(a, i)) * t))
+  return '#' + out.map(v => v.toString(16).padStart(2, '0')).join('')
+}
+
+// السما بتبلّش غروب (بنفسجي دافي، تحتها خمري) وبتغمق لليل مع كل نَفَس.
+function defs(night: number): string {
   return `<defs>
-<linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17112e"/><stop offset="1" stop-color="#2d1f4a"/></linearGradient>
+<linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${mix('#2a1d4e', '#120d26', night)}"/><stop offset="1" stop-color="${mix('#5b2f57', '#241a40', night)}"/></linearGradient>
 <linearGradient id="cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3b86d"/><stop offset=".5" stop-color="#d0843a"/><stop offset="1" stop-color="#94501d"/></linearGradient>
 <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f2ede4"/><stop offset="1" stop-color="#c9c0b0"/></linearGradient>
 <linearGradient id="rollPaper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffef9"/><stop offset=".5" stop-color="#f3eee2"/><stop offset="1" stop-color="#cfc6b3"/></linearGradient>
@@ -148,12 +217,12 @@ function defs(): string {
 
 // الرسمة بتتغيّر بس لما يزيد نَفَس أو تبدّل النوع — كل تغيير بيعيد تحميلها،
 // فلا هي ولا حدّ الـ5 ساعات بيعتمدوا على «كلود عم يشتغل» (كان يعمل وميض على ويندوز).
-function scene(kind: Style, puffs: number): string {
+function scene(kind: Style, puffs: number, ln: Lang): string {
   const f = Math.min(1, puffs / PUFFS)
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="112" viewBox="0 0 600 112">` +
-    `${defs()}<rect width="600" height="112" rx="16" fill="url(#sky)"/>${stars()}` +
-    (f >= 1 ? burnedOut(kind) : burning(kind, puffs, f)) +
+    `${defs(f)}<rect width="600" height="112" rx="16" fill="url(#sky)"/>${stars(f)}` +
+    (f >= 1 ? burnedOut(kind) : burning(kind, puffs, f, ln)) +
     '</svg>'
   )
 }
@@ -206,7 +275,17 @@ ${folds}
 <line x1="${x0}" y1="${cy - hh0 + 2.5}" x2="${end.toFixed(1)}" y2="${(cy - hh + 3).toFixed(1)}" stroke="#ffffff" stroke-width=".9" opacity=".9"/>`
 }
 
-function burning(kind: Style, puffs: number, f: number): string {
+// العنوان والعدّاد: إنجليزي (العنوان يسار) أو عربي (العنوان يمين، متل الكتابة).
+function header(kind: Style, puffs: number, ln: Lang): string {
+  if (ln === 'ar') {
+    return `<text x="572" y="23" text-anchor="end" font-family="${FONT}" font-size="12" font-weight="700" fill="#a99ccf">${KINDS[kind].title.ar}</text>
+<text x="28" y="23" font-family="${FONT}" font-size="11" font-weight="600" letter-spacing="1.6" fill="#a99ccf">${puffs} / ${PUFFS}</text>`
+  }
+  return `<text x="28" y="22" font-family="${FONT}" font-size="10" font-weight="600" letter-spacing="2.6" fill="#a99ccf">${KINDS[kind].title[ln]}</text>
+<text x="572" y="22" text-anchor="end" font-family="${FONT}" font-size="10" font-weight="600" letter-spacing="1.6" fill="#a99ccf">${puffs} / ${PUFFS} PUFFS</text>`
+}
+
+function burning(kind: Style, puffs: number, f: number, ln: Lang): string {
   const cy = 54
   const px1 = 520
   const pulse = '2.2s'
@@ -249,8 +328,7 @@ function burning(kind: Style, puffs: number, f: number): string {
   }
 
   return `
-<text x="28" y="22" font-family="${FONT}" font-size="10" font-weight="600" letter-spacing="2.6" fill="#a99ccf">${KINDS[kind].title}</text>
-<text x="572" y="22" text-anchor="end" font-family="${FONT}" font-size="10" font-weight="600" letter-spacing="1.6" fill="#a99ccf">${puffs} / ${PUFFS} PUFFS</text>
+${header(kind, puffs, ln)}
 <ellipse cx="${(28 + end) / 2}" cy="${cy + hh + 5}" rx="${(end - 28) / 2}" ry="4" fill="#000" opacity=".35" filter="url(#blur)"/>
 ${stick}
 ${tip(end, cy, hh, pulse)}
@@ -306,7 +384,7 @@ function jointPaper(cells: number): string {
 }
 
 // شريط حدّ الـ5 ساعات: الجزء المستهلك ━ ملوّن، والباقي ─ باهت.
-function limitParts(lim: Exclude<Limit, null>, now: number) {
+function limitParts(lim: Exclude<Limit, null>, now: number, ln: Lang) {
   const pct = Math.max(0, Math.min(100, lim.percent))
   const on = Math.round((pct / 100) * LIMIT_CELLS)
   return {
@@ -314,7 +392,8 @@ function limitParts(lim: Exclude<Limit, null>, now: number) {
     used: '━'.repeat(on),
     left: '─'.repeat(LIMIT_CELLS - on),
     pct: `${Math.round(pct)}%`,
-    resets: resetsIn(lim, now),
+    resets: resetsIn(lim, now, ln),
+    label: LIMIT_LABEL[ln],
   }
 }
 
@@ -336,24 +415,41 @@ export const register: Register = on => {
       os => os === 'Windows_NT',
       () => false,
     )
-    const saved = await $.store.get('style')
-    if (saved === 'joint' || saved === 'cigarette') await update($, style, () => saved)
-    await $.command.register({
-      name: 'smoke',
-      description: 'Switch between the chat cigarette 🚬 and the chat joint 🌿',
-      argumentHint: '[cigarette|joint]',
-    })
+    // الافتراضي سيجارة بالإنجليزي؛ اختيارك (/smoke · /smokear · /smokeen) بيضل محفوظ.
+    const [savedKind, savedLang] = await Promise.all([$.store.get('kind'), $.store.get('lang')])
+    if (savedKind === 'joint' || savedKind === 'cigarette') await update($, style, () => savedKind)
+    if (savedLang === 'ar' || savedLang === 'en') await update($, lang, () => savedLang)
+    await Promise.all([
+      $.command.register({
+        name: 'smoke',
+        description: 'Switch between the chat cigarette 🚬 and the chat joint 🌿',
+        argumentHint: '[cigarette|joint]',
+        immediate: true,
+      }),
+      $.command.register({ name: 'smokear', description: 'Chat cigarette in Arabic — بالعربي', immediate: true }),
+      $.command.register({ name: 'smokeen', description: 'Chat cigarette in English', immediate: true }),
+      $.command.register({ name: 'smokeng', description: 'Chat cigarette in English (same as /smokeen)', immediate: true }),
+    ])
     return next(e)
   })
 
   on('command.run', { command: 'smoke' }, async ($, e) => {
-    const current = await read($, style)
+    const [current, ln] = await Promise.all([read($, style), read($, lang)])
     const want = parseStyle(e.args) ?? (current === 'joint' ? 'cigarette' : 'joint')
     await update($, style, () => want)
-    await $.store.set('style', want)
-    return {
-      text: want === 'joint' ? '🌿 Switched to the chat joint.' : '🚬 Switched to the chat cigarette.',
+    await $.store.set('kind', want)
+    const said = {
+      joint: { en: '🌿 Switched to the chat joint.', ar: '🌿 صار جوينت.' },
+      cigarette: { en: '🚬 Switched to the chat cigarette.', ar: '🚬 صارت سيجارة.' },
     }
+    return { text: said[want][ln] }
+  })
+
+  on('command.run', { command: ['smokear', 'smokeen', 'smokeng'] }, async ($, e) => {
+    const want: Lang = e.command === 'smokear' ? 'ar' : 'en'
+    await update($, lang, () => want)
+    await $.store.set('lang', want)
+    return { text: want === 'ar' ? '🇸🇾 صارت الكتابة بالعربي.' : '🇬🇧 Chat cigarette is in English now.' }
   })
 
   on('prompt.submit', async ($, e, next) => {
@@ -395,15 +491,16 @@ export const register: Register = on => {
     if (e.props.hasSurvey || e.props.view.agentId !== undefined) return next(e)
 
     // كل القراءات سوا — رحلة وحدة بدل أربعة، عشان الرسمة ما تتأخر.
-    const [s, lim, kind, now] = await Promise.all([
+    const [s, lim, kind, ln, now] = await Promise.all([
       read($, smoke),
       read($, limit),
       read($, style),
+      read($, lang),
       $.clock.now(),
     ])
-    const line = tagline(kind, s.puffs)
+    const line = tagline(kind, ln, s.puffs)
     const isOut = s.puffs >= PUFFS
-    const p = lim === null ? null : limitParts(lim, now)
+    const p = lim === null ? null : limitParts(lim, now, ln)
 
     if (e.surface === 'desktop') {
       const { Box, Text, Svg } = $.ui.resolve(e)
@@ -415,7 +512,7 @@ export const register: Register = on => {
       ]
       if (p !== null) {
         const parts = [
-          <Text key="label" dimColor>⏳ 5-hour limit</Text>,
+          <Text key="label" dimColor>{p.label}</Text>,
           <Box key="bar" flexDirection="row">
             <Text color={p.color}>{p.used}</Text>
             <Text dimColor>{p.left}</Text>
@@ -432,7 +529,7 @@ export const register: Register = on => {
       return (
         <Box flexDirection="column" gap={1}>
           <Svg
-            source={scene(kind, s.puffs)}
+            source={scene(kind, s.puffs, ln)}
             alt={
               isOut
                 ? `Chat ${noun} burned out — ${REST_LINE}`
@@ -472,7 +569,7 @@ export const register: Register = on => {
       ]
       if (p !== null) {
         const parts = [
-          <Text key="label" dimColor>⏳ 5-hour limit</Text>,
+          <Text key="label" dimColor>{p.label}</Text>,
           <Box key="bar" flexDirection="row">
             <Text color={p.color}>{p.used}</Text>
             <Text dimColor>{p.left}</Text>
