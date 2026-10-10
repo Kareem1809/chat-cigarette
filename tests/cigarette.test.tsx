@@ -21,7 +21,7 @@ test('every message is a puff, and the band shows the count on both surfaces', a
   }
   const term = await $.ui.mount({ ...BAND, surface: 'terminal' })
   expect(await term.find({ type: 'Text', text: '3/20' })).toBeDefined()
-  expect(await term.find({ type: 'Text', text: /استمتع بالحكي/ })).toBeDefined()
+  expect(await term.find({ type: 'Text', text: /enjoy the chat/ })).toBeDefined()
   await term.unmount()
 
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
@@ -54,7 +54,7 @@ test('the last puff asks Claude to say it is time to rest, and the band burns ou
 
   for (const surface of ['terminal', 'desktop'] as const) {
     const ui = await $.ui.mount({ ...BAND, surface })
-    expect(await ui.find({ type: 'Text', text: /خلصت السيجارة/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /burned out/ })).toBeDefined()
     expect(JSON.stringify(await ui.drawn())).toContain("It's time to get some rest")
     await ui.unmount()
   }
@@ -73,7 +73,7 @@ test('/smoke switches to the joint and back, on both surfaces', async ($, on) =>
   expect((await $.command.run(SMOKE('joint'))).text).toContain('joint')
   for (const surface of ['terminal', 'desktop'] as const) {
     const ui = await $.ui.mount({ ...BAND, surface })
-    expect(await ui.find({ type: 'Text', text: /الجوينت/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Joint lit/ })).toBeDefined()
     await ui.unmount()
   }
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
@@ -90,25 +90,54 @@ test('a joint picked last time comes back in the next session', async ($, on) =>
   on('command.register', () => ({ value: undefined }) as never)
   await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /الجوينت/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /Joint lit/ })).toBeDefined()
   await ui.unmount()
 })
 
-test('the 5-hour limit is a bar with no words', async ($, on) => {
+test('the 5-hour limit is a tidy English row, outside the drawing', async ($, on) => {
   mock.clock(on)
   on('session.measure', ($, e) => ({ changed: e.changed }))
   await $.session.measure({
     context: { window: 200000 },
-    rateLimits: [{ kind: 'five_hour', percentUsed: 42 }],
+    rateLimits: [{ kind: 'five_hour', percentUsed: 42, resetsAt: new Date(8_100_000).toISOString() }],
     changed: ['rateLimits'],
   })
-  const term = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect((await term.find({ type: 'Text', text: '▰▰▰▰' }))).toBeDefined()
-  expect(await term.find({ type: 'Text', text: /%|حدّ/ })).toBeUndefined()
-  await term.unmount()
-
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const ui = await $.ui.mount({ ...BAND, surface })
+    expect(await ui.find({ type: 'Text', text: '5-hour limit' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: '42%' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'resets in 2h 15m' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: '━━━━━━' })).toBeDefined()
+    await ui.unmount()
+  }
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
-  expect(await desk.find({ type: 'Text', text: /%|حدّ/ })).toBeUndefined()
-  expect(JSON.stringify(await desk.drawn())).toContain('5-hour limit: 42%')
+  expect(JSON.stringify(await desk.drawn())).not.toContain('5-hour limit:')
   await desk.unmount()
 })
+
+test('the drawing does not change when Claude starts working (no reload flash)', async ($, on) => {
+  mock.clock(on)
+  const idle = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  const before = JSON.stringify((await idle.find({ type: 'Svg' })) ?? null)
+  await idle.unmount()
+  const busy = await $.ui.mount({ ...BAND, surface: 'desktop', props: { ...BAND.props, isWorking: true } })
+  expect(JSON.stringify((await busy.find({ type: 'Svg' })) ?? null)).toBe(before)
+  await busy.unmount()
+})
+
+for (const [name, env, isAnimated] of [
+  ['on Windows the drawing is a still image (no iframe reload)', { OS: 'Windows_NT' }, false],
+  ['elsewhere the drawing is animated', {}, true],
+] as const) {
+  test(name, async ($, on) => {
+    mock.clock(on)
+    mock.store(on)
+    mock.env(on, env)
+    on('session.start', ($, e) => ({ cwd: e.cwd }))
+    on('command.register', () => ({ value: undefined }) as never)
+    await $.session.start({ cwd: '/tmp', surface: 'desktop', isInteractive: true })
+    const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+    expect(JSON.stringify(await ui.drawn()).includes('"isInteractive":true')).toBe(isAnimated)
+    await ui.unmount()
+  })
+}

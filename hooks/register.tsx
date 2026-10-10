@@ -27,24 +27,24 @@ const KINDS: Record<Style, { title: string; noun: string; lines: readonly string
     title: 'CHAT CIGARETTE',
     noun: 'cigarette',
     lines: [
-      '🔥 ولّعنا سيجارة المحادثة — كل رسالة منك نَفَس',
-      '☕ لسا بأولها… استمتع بالحكي',
-      '🌬️ ربعها راح — خذ نفس هوا حقيقي كمان',
-      '⏳ نصّها راح — قرّب وقت الاستراحة',
-      '🕯️ آخر كم نَفَس — جهّز حالك ترتاح',
-      '🍁 خلصت السيجارة… سكّر الشاشة وروح ارتاح',
+      '🔥 Cigarette lit — every message is a puff',
+      '☕ Just getting started — enjoy the chat',
+      '🌬️ A quarter gone — grab some real fresh air too',
+      '⏳ Halfway down — a break is coming up',
+      '🕯️ Last few puffs — get ready to rest',
+      '🍁 Cigarette burned out — close the screen and go rest',
     ],
   },
   joint: {
     title: 'CHAT JOINT',
     noun: 'joint',
     lines: [
-      '🔥 ولّعنا الجوينت — كل رسالة منك نَفَس',
-      '😌 لسا بأوله… روق واستمتع بالحكي',
-      '🌬️ ربعه راح — خذ نفس هوا حقيقي كمان',
-      '⏳ نصّه راح — قرّب وقت الاستراحة',
-      '🕯️ آخر كم نَفَس — جهّز حالك ترتاح',
-      '🍁 خلص الجوينت… سكّر الشاشة وروح ارتاح',
+      '🔥 Joint lit — every message is a puff',
+      '😌 Just getting started — chill and enjoy the chat',
+      '🌬️ A quarter gone — grab some real fresh air too',
+      '⏳ Halfway down — a break is coming up',
+      '🕯️ Last few puffs — get ready to rest',
+      '🍁 Joint burned out — close the screen and go rest',
     ],
   },
 }
@@ -71,16 +71,15 @@ function limitColor(pct: number): string {
   return pct < 50 ? '#5fd3a5' : pct < 80 ? '#ffb347' : '#ff5a5f'
 }
 
-// النص بيطلع بس لما تمرّق الماوس فوق الشريط (tooltip) — الشريط نفسه بلا كتابة.
-function limitHint(lim: Exclude<Limit, null>, now: number): string {
-  let hint = `5-hour limit: ${Math.round(lim.percent)}%`
+// «resets in 2h 15m» — فاضي إذا ما في وقت تجديد.
+function resetsIn(lim: Exclude<Limit, null>, now: number): string {
   const at = lim.resetsAt ? Date.parse(lim.resetsAt) : NaN
-  if (Number.isFinite(at) && at > now) {
-    const mins = Math.round((at - now) / 60000)
-    hint += ` · resets in ${Math.floor(mins / 60)}h ${mins % 60}m`
-  }
-  return hint
+  if (!Number.isFinite(at) || at <= now) return ''
+  const mins = Math.round((at - now) / 60000)
+  return `resets in ${Math.floor(mins / 60)}h ${mins % 60}m`
 }
+
+const LIMIT_CELLS = 14
 
 // ───────────── الرسمة (ديسكتوب): SVG بدخان متحرك ─────────────
 
@@ -147,32 +146,16 @@ function defs(): string {
 </defs>`
 }
 
-function scene(kind: Style, puffs: number, isWorking: boolean, lim: Limit, now: number): string {
+// الرسمة بتتغيّر بس لما يزيد نَفَس أو تبدّل النوع — كل تغيير بيعيد تحميلها،
+// فلا هي ولا حدّ الـ5 ساعات بيعتمدوا على «كلود عم يشتغل» (كان يعمل وميض على ويندوز).
+function scene(kind: Style, puffs: number): string {
   const f = Math.min(1, puffs / PUFFS)
-  const h = lim === null ? 112 : 124
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="${h}" viewBox="0 0 600 ${h}">` +
-    `${defs()}<rect width="600" height="${h}" rx="16" fill="url(#sky)"/>${stars()}` +
-    (f >= 1 ? burnedOut(kind) : burning(kind, puffs, f, isWorking)) +
-    (lim === null ? '' : limitBar(lim, now, 111)) +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="112" viewBox="0 0 600 112">` +
+    `${defs()}<rect width="600" height="112" rx="16" fill="url(#sky)"/>${stars()}` +
+    (f >= 1 ? burnedOut(kind) : burning(kind, puffs, f)) +
     '</svg>'
   )
-}
-
-// حدّ الـ5 ساعات: ساعة رمل صغيرة + شريط ملوّن، بلا كتابة.
-function limitBar(lim: Exclude<Limit, null>, now: number, y: number): string {
-  const pct = Math.max(0, Math.min(100, lim.percent))
-  const x0 = 46
-  const x1 = 572
-  const w = (((x1 - x0) * pct) / 100).toFixed(1)
-  const color = limitColor(pct)
-  return `<g><title>${limitHint(lim, now)}</title>
-<path d="M 29 ${y - 6} h 10 M 29 ${y + 6} h 10 M 30 ${y - 6} c 0 4 4 4.5 4 6 c 0 1.5 -4 2 -4 6 M 38 ${y - 6} c 0 4 -4 4.5 -4 6 c 0 1.5 4 2 4 6" stroke="#a99ccf" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-<path d="M 31.5 ${y + 5} h 5 l -2.5 -3 z" fill="${color}"/>
-<rect x="${x0}" y="${y - 2}" width="${x1 - x0}" height="4" rx="2" fill="#3a2f5c"/>
-<rect x="${x0}" y="${y - 2}" width="${w}" height="4" rx="2" fill="${color}" opacity=".6" filter="url(#blur)"/>
-<rect x="${x0}" y="${y - 2}" width="${w}" height="4" rx="2" fill="${color}"/>
-</g>`
 }
 
 // الجمرة والرماد والشرار عند الطرف المولّع — نفسها للسيجارة والجوينت.
@@ -223,11 +206,11 @@ ${folds}
 <line x1="${x0}" y1="${cy - hh0 + 2.5}" x2="${end.toFixed(1)}" y2="${(cy - hh + 3).toFixed(1)}" stroke="#ffffff" stroke-width=".9" opacity=".9"/>`
 }
 
-function burning(kind: Style, puffs: number, f: number, isWorking: boolean): string {
+function burning(kind: Style, puffs: number, f: number): string {
   const cy = 54
   const px1 = 520
-  const pulse = isWorking ? '1.1s' : '2.6s'
-  const dur = isWorking ? 2.4 : 3.8
+  const pulse = '2.2s'
+  const dur = 3.4
 
   let end: number
   let hh: number
@@ -322,6 +305,19 @@ function jointPaper(cells: number): string {
   return out
 }
 
+// شريط حدّ الـ5 ساعات: الجزء المستهلك ━ ملوّن، والباقي ─ باهت.
+function limitParts(lim: Exclude<Limit, null>, now: number) {
+  const pct = Math.max(0, Math.min(100, lim.percent))
+  const on = Math.round((pct / 100) * LIMIT_CELLS)
+  return {
+    color: limitColor(pct),
+    used: '━'.repeat(on),
+    left: '─'.repeat(LIMIT_CELLS - on),
+    pct: `${Math.round(pct)}%`,
+    resets: resetsIn(lim, now),
+  }
+}
+
 function parseStyle(args: string): Style | null {
   const a = args.trim().toLowerCase()
   if (a === 'joint' || a.includes('جوينت')) return 'joint'
@@ -330,7 +326,16 @@ function parseStyle(args: string): Style | null {
 }
 
 export const register: Register = on => {
+  // على ويندوز الرسمة المتحركة (iframe) بتختفي ثانيتين كل ما تنعاد تحميلها،
+  // فهناك بنرسمها صورة ثابتة — بتتبدّل فوراً بلا وميض.
+  let isWindows = false
+
   on('session.start', async ($, e, next) => {
+    // إذا ما قدرنا نعرف النظام، بنكمّل عادي (الرسمة المتحركة).
+    isWindows = await $.env.get('OS').then(
+      os => os === 'Windows_NT',
+      () => false,
+    )
     const saved = await $.store.get('style')
     if (saved === 'joint' || saved === 'cigarette') await update($, style, () => saved)
     await $.command.register({
@@ -389,29 +394,53 @@ export const register: Register = on => {
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey || e.props.view.agentId !== undefined) return next(e)
 
-    const s = await read($, smoke)
-    const lim = await read($, limit)
-    const kind = await read($, style)
+    // كل القراءات سوا — رحلة وحدة بدل أربعة، عشان الرسمة ما تتأخر.
+    const [s, lim, kind, now] = await Promise.all([
+      read($, smoke),
+      read($, limit),
+      read($, style),
+      $.clock.now(),
+    ])
     const line = tagline(kind, s.puffs)
     const isOut = s.puffs >= PUFFS
+    const p = lim === null ? null : limitParts(lim, now)
 
     if (e.surface === 'desktop') {
       const { Box, Text, Svg } = $.ui.resolve(e)
       const noun = KINDS[kind].noun
+      const rows = [
+        <Text key="tag" bold color={isOut ? '#b9a6ff' : undefined}>
+          {line}
+        </Text>,
+      ]
+      if (p !== null) {
+        const parts = [
+          <Text key="label" dimColor>⏳ 5-hour limit</Text>,
+          <Box key="bar" flexDirection="row">
+            <Text color={p.color}>{p.used}</Text>
+            <Text dimColor>{p.left}</Text>
+          </Box>,
+          <Text key="pct" bold color={p.color}>{p.pct}</Text>,
+        ]
+        if (p.resets) parts.push(<Text key="resets" dimColor>{`· ${p.resets}`}</Text>)
+        rows.push(
+          <Box key="limit" flexDirection="row" gap={1}>
+            {parts}
+          </Box>,
+        )
+      }
       return (
         <Box flexDirection="column" gap={1}>
           <Svg
-            source={scene(kind, s.puffs, e.props.isWorking, lim, await $.clock.now())}
+            source={scene(kind, s.puffs)}
             alt={
               isOut
                 ? `Chat ${noun} burned out — ${REST_LINE}`
                 : `Chat ${noun}: ${s.puffs} of ${PUFFS} puffs smoked`
             }
-            isInteractive
+            isInteractive={!isWindows}
           />
-          <Text key="tag" bold color={isOut ? '#b9a6ff' : undefined}>
-            {line}
-          </Text>
+          <Box flexDirection="column">{rows}</Box>
         </Box>
       )
     }
@@ -437,25 +466,27 @@ export const register: Register = on => {
             <Text key="smoke" dimColor>{e.props.isWorking ? ' ∿∿~' : ' ~'}</Text>,
             <Text key="count" dimColor>{`  ${s.puffs}/${PUFFS}`}</Text>,
           ]
-      const footer = [<Text key="tag">{line}</Text>]
-      if (lim !== null) {
-        const filled = Math.round(Math.max(0, Math.min(100, lim.percent)) / 10)
-        footer.push(
-          <Box key="limit" flexDirection="row">
-            <Text dimColor>⏳ </Text>
-            <Text color={limitColor(lim.percent)}>{'▰'.repeat(filled)}</Text>
-            <Text dimColor>{'▱'.repeat(10 - filled)}</Text>
+      const rows = [
+        <Box key="stick" flexDirection="row">{stick}</Box>,
+        <Text key="tag">{line}</Text>,
+      ]
+      if (p !== null) {
+        const parts = [
+          <Text key="label" dimColor>⏳ 5-hour limit</Text>,
+          <Box key="bar" flexDirection="row">
+            <Text color={p.color}>{p.used}</Text>
+            <Text dimColor>{p.left}</Text>
+          </Box>,
+          <Text key="pct" bold color={p.color}>{p.pct}</Text>,
+        ]
+        if (p.resets) parts.push(<Text key="resets" dimColor>{`· ${p.resets}`}</Text>)
+        rows.push(
+          <Box key="limit" flexDirection="row" gap={1}>
+            {parts}
           </Box>,
         )
       }
-      return (
-        <Box flexDirection="column">
-          <Box flexDirection="row">{stick}</Box>
-          <Box flexDirection="row" gap={3}>
-            {footer}
-          </Box>
-        </Box>
-      )
+      return <Box flexDirection="column">{rows}</Box>
     }
 
     return next(e)
