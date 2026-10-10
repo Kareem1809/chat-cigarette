@@ -50,7 +50,8 @@ export function duration(ms: number, ln: Lang): string {
 
 type Lines = { early: readonly string[]; mid: readonly string[]; late: readonly string[] }
 
-// كل نَفَس بياخد جملة غير اللي قبلها، من مجموعة المرحلة (أول التلت · النص · الآخر).
+// 50 جملة بكل لغة (17 أول التلت · 17 النص · 16 الآخر). كل نَفَس بياخد جملة غير اللي قبلها،
+// وكل سيجارة بتبلّش من مكان غير اللي قبلها (seed) — عشان الواحد ما يزهق.
 const LINES: Record<Lang, Lines> = {
   en: {
     early: [
@@ -60,6 +61,17 @@ const LINES: Record<Lang, Lines> = {
       '💬 Good chat so far — keep it light',
       '🪟 Glance out the window — your eyes will thank you',
       '💧 Sip some water between puffs',
+      '🪑 Sit up straight — your back has been asking politely',
+      '🌱 Fresh start, fresh code',
+      '🎶 Put on something nice and keep going',
+      '🙂 You’re doing fine. Really.',
+      '🐢 Slow puffs, clean commits',
+      '🌞 Daylight exists. Just saying.',
+      '📝 Small steps beat big rewrites',
+      '🍵 A tea break counts as productivity',
+      '🤝 Pair programming with a smoke. Classic.',
+      '🧃 Drink something, the code will wait',
+      '🔋 Battery’s full — how about yours?',
     ],
     mid: [
       '🌬️ Grab some real fresh air too',
@@ -68,6 +80,17 @@ const LINES: Record<Lang, Lines> = {
       '👀 Look at something far away for 20 seconds',
       '🚶 Stretch your legs after this one',
       '🍃 Slow down — the screen isn’t going anywhere',
+      '🖐️ Shake out your hands — they type a lot',
+      '😮‍💨 Exhale. The bug isn’t going anywhere either.',
+      '🧠 Your brain needs memory too — give it five',
+      '🪴 Water the plant. Then yourself.',
+      '📵 Check on a human, not a notification',
+      '🕰️ When did you last stand up? Exactly.',
+      '🫖 Kettle on? Good idea.',
+      '🎯 Finish this thought, then breathe',
+      '🙆 Neck rolls are free',
+      '🌇 The sun is doing something nice outside',
+      '💭 Step away for a minute — the answer often walks in',
     ],
     late: [
       '🕯️ Last few puffs — get ready to rest',
@@ -76,6 +99,16 @@ const LINES: Record<Lang, Lines> = {
       '📌 Note where you stopped — pick it up tomorrow',
       '🛏️ Your bed misses you',
       '⌛ Just a couple left',
+      '💾 Commit, push, go',
+      '🚪 The door is right there',
+      '🧺 The ashtray’s filling up — so is your day',
+      '🏁 Last lap',
+      '🧯 Put it out gracefully',
+      '👋 Say bye to the terminal',
+      '🌆 Golden hour for logging off',
+      '📴 Screens off soon. You’ve earned it.',
+      '🛋️ The couch called. It feels lonely.',
+      '🌌 One more puff and you’re free',
     ],
   },
   ar: {
@@ -86,6 +119,17 @@ const LINES: Record<Lang, Lines> = {
       '💬 حكي حلو لهلّق — خلّيه خفيف',
       '🪟 طلّة عالشباك؟ عيونك رح تشكرك',
       '💧 اشرب شوية مي بين النَّفَس والتاني',
+      '🪑 اقعد منيح — ظهرك عم يطلب بأدب',
+      '🌱 بداية جديدة، كود جديد',
+      '🎶 حط إشي حلو تسمعه وكمّل',
+      '🙂 ماشي منيح. جد.',
+      '🐢 نَفَس بطيء، كوميت نضيف',
+      '🌞 في شمس برّا. بس بحكيلك.',
+      '📝 خطوات صغيرة أحسن من إعادة كتابة كبيرة',
+      '🍵 استراحة الشاي بتنحسب شغل',
+      '🤝 برمجة بالأزواج مع الدخان. كلاسيك.',
+      '🧃 اشرب إشي، الكود بيستنّى',
+      '🔋 البطارية مليانة — وإنت؟',
     ],
     mid: [
       '🌬️ خد كمان نفس هوا حقيقي',
@@ -94,6 +138,17 @@ const LINES: Record<Lang, Lines> = {
       '👀 طلّع على إشي بعيد 20 ثانية',
       '🚶 قوم مدّ إجريك بعد هاي',
       '🍃 عالهدا — الشاشة مش رايحة لمحل',
+      '🖐️ نفّض إيديك — كتير عم يكتبوا',
+      '😮‍💨 زفير… والبقّ كمان مش رايح لمحل',
+      '🧠 مخّك بدو ذاكرة كمان — ريّحه خمس دقايق',
+      '🪴 اسقي الزريعة. وبعدين اسقي حالك.',
+      '📵 اطمّن على إنسان، مش على إشعار',
+      '🕰️ إمتى آخر مرة وقفت؟ بالزبط.',
+      '🫖 تحط إبريق؟ فكرة منيحة.',
+      '🎯 خلّص هالفكرة، وبعدين تنفّس',
+      '🙆 تدوير الرقبة ببلاش',
+      '🌇 الشمس عم تعمل إشي حلو برّا',
+      '💭 ابعد دقيقة — كتير مرات الحل بيجي لحاله',
     ],
     late: [
       '🕯️ آخر كم نَفَس — جهّز حالك ترتاح',
@@ -102,6 +157,16 @@ const LINES: Record<Lang, Lines> = {
       '📌 سجّل وين وقفت — بتكمّل بكرا',
       '🛏️ تختك مشتاقلك',
       '⌛ ضايل كم نَفَس بس',
+      '💾 كوميت، بوش، وروّح',
+      '🚪 الباب هناك',
+      '🧺 المكتة عم تتعبّى — ويومك كمان',
+      '🏁 آخر لفّة',
+      '🧯 طفّيها بكرامة',
+      '👋 قول باي للتيرمنال',
+      '🌆 أحلى وقت تسكّر فيه',
+      '📴 قرّبنا نطفي الشاشات. بتستاهل.',
+      '🛋️ الكنباية اتصلت. حاسّة حالها وحيدة.',
+      '🌌 نَفَس كمان وبتصير حرّ',
     ],
   },
   he: {
@@ -112,6 +177,17 @@ const LINES: Record<Lang, Lines> = {
       '💬 שיחה טובה עד עכשיו — תשמור על זה קליל',
       '🪟 תציץ רגע מהחלון — העיניים יודו לך',
       '💧 תשתה קצת מים בין שאכטה לשאכטה',
+      '🪑 שב ישר — הגב שלך מבקש יפה',
+      '🌱 התחלה חדשה, קוד חדש',
+      '🎶 שים משהו טוב ברקע ותמשיך',
+      '🙂 אתה בסדר. באמת.',
+      '🐢 שאכטות איטיות, קומיטים נקיים',
+      '🌞 יש שמש בחוץ. רק אומר.',
+      '📝 צעדים קטנים עדיפים על שכתוב גדול',
+      '🍵 הפסקת תה נחשבת פרודוקטיביות',
+      '🤝 פיר פרוגרמינג עם שאכטה. קלאסיקה.',
+      '🧃 תשתה משהו, הקוד יחכה',
+      '🔋 הסוללה מלאה — ושלך?',
     ],
     mid: [
       '🌬️ תנשום גם קצת אוויר אמיתי',
@@ -120,6 +196,17 @@ const LINES: Record<Lang, Lines> = {
       '👀 תסתכל על משהו רחוק 20 שניות',
       '🚶 קום תמתח את הרגליים אחרי זה',
       '🍃 לאט לאט — המסך לא בורח לשום מקום',
+      '🖐️ תנער את הידיים — הן מקלידות הרבה',
+      '😮‍💨 נשיפה. גם הבאג לא הולך לשום מקום.',
+      '🧠 גם למוח צריך זיכרון — תן לו חמש דקות',
+      '🪴 תשקה את העציץ. ואז את עצמך.',
+      '📵 תבדוק מה שלום בן אדם, לא התראה',
+      '🕰️ מתי קמת בפעם האחרונה? בדיוק.',
+      '🫖 להרתיח מים? רעיון טוב.',
+      '🎯 תסיים את המחשבה הזאת, ואז תנשום',
+      '🙆 סיבובי צוואר זה בחינם',
+      '🌇 השמש עושה משהו יפה בחוץ',
+      '💭 תתרחק לדקה — הרבה פעמים הפתרון מגיע לבד',
     ],
     late: [
       '🕯️ עוד כמה שאכטות — תתכונן לנוח',
@@ -128,6 +215,16 @@ const LINES: Record<Lang, Lines> = {
       '📌 תרשום איפה עצרת — תמשיך מחר',
       '🛏️ המיטה מתגעגעת אליך',
       '⌛ נשארו רק עוד כמה',
+      '💾 קומיט, פוש, הביתה',
+      '🚪 הדלת שם',
+      '🧺 המאפרה מתמלאת — וגם היום שלך',
+      '🏁 הקפה אחרונה',
+      '🧯 תכבה בכבוד',
+      '👋 תגיד ביי לטרמינל',
+      '🌆 השעה הכי יפה לסגור את המחשב',
+      '📴 עוד מעט מכבים מסכים. מגיע לך.',
+      '🛋️ הספה התקשרה. היא מרגישה בודדה.',
+      '🌌 עוד שאכטה ואתה חופשי',
     ],
   },
 }
@@ -205,7 +302,14 @@ export const KINDS: Record<Style, Kind> = {
   },
 }
 
-export function tagline(kind: Style, ln: Lang, puffs: number, now: number): string {
+// رقم لكل سيجارة: من اليوم + كم عقب بالمنفضة. السيجارة الجاية بتبلّش من مكان تاني بالجمل والتحذيرات.
+export function seedOf(dayKeyText: string, butts: number): number {
+  let h = 0
+  for (const c of dayKeyText) h = (h * 31 + c.charCodeAt(0)) % 9973
+  return h + butts * 7
+}
+
+export function tagline(kind: Style, ln: Lang, puffs: number, now: number, seed = 0): string {
   if (puffs >= PUFFS) return KINDS[kind].out[ln]
   const phase = nightPhase(now)
   const time = clockText(now, ln)
@@ -214,7 +318,7 @@ export function tagline(kind: Style, ln: Lang, puffs: number, now: number): stri
   if (puffs === 0) return KINDS[kind].lit[ln]
   const f = puffs / PUFFS
   const pool = LINES[ln][f < 1 / 3 ? 'early' : f < 2 / 3 ? 'mid' : 'late']
-  return pool[puffs % pool.length] ?? ''
+  return pool[(puffs + seed) % pool.length] ?? ''
 }
 
 // ───────────── تحذيرات الباكيت (تقليد للتحذيرات الحقيقية) ─────────────
@@ -269,11 +373,18 @@ const WARNINGS: Record<Lang, { all: readonly string[]; joint: readonly string[] 
   },
 }
 
-// تحذير جديد مع كل نَفَس (خطوة 3 عشان ما يمشي مع ترتيب الجمل).
-export function warning(kind: Style, ln: Lang, puffs: number): string {
+// كل التحذيرات بالترتيب، بادئين من تحذير هالنَّفَس — الرسمة بتلفّ عليهم لحالها.
+export function warnings(kind: Style, ln: Lang, puffs: number, seed = 0): string[] {
   const w = WARNINGS[ln]
   const pool = kind === 'joint' ? [...w.joint, ...w.all] : w.all
-  return WARN_PREFIX[ln] + (pool[(puffs * 3) % pool.length] ?? '')
+  // خطوة 7 (ما بتقسم 10 ولا 12) — عشان يمرّوا كل التحذيرات قبل ما يتكرّروا.
+  const start = (puffs * 7 + seed) % pool.length
+  return [...pool.slice(start), ...pool.slice(0, start)].map(t => WARN_PREFIX[ln] + t)
+}
+
+// تحذير هالنَّفَس (التيرمنال بيعرض واحد بس).
+export function warning(kind: Style, ln: Lang, puffs: number, seed = 0): string {
+  return warnings(kind, ln, puffs, seed)[0] ?? ''
 }
 
 // ───────────── العدّادات (حدّ الـ5 ساعات + الكونتكست) ─────────────
@@ -329,6 +440,8 @@ export function stats(ln: Lang, butts: number, puffs: number, limitPct: number |
 }
 
 export const SHARE: Record<Lang, string> = { en: '📸 Share it:', ar: '📸 شاركها:', he: '📸 תשתף:' }
+
+export const PUFF_WORD: Record<Lang, string> = { en: 'puffs', ar: 'نَفَس', he: 'שאכטות' }
 
 // ───────────── اللي كلود بيقراه (مخفي عنك) ─────────────
 

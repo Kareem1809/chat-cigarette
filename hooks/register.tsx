@@ -16,6 +16,7 @@ import {
   KINDS,
   METER,
   PUFFS,
+  PUFF_WORD,
   REST_LINE,
   SAID,
   SHARE,
@@ -25,9 +26,10 @@ import {
   nightPhase,
   outOfSmokes,
   resetsIn,
+  seedOf,
   stats,
   tagline,
-  warning,
+  warnings,
 } from './words'
 
 const smoke = atom({ plugin: 'chat-cigarette', key: 'smoke' } as const, {
@@ -43,8 +45,8 @@ const lang = atom({ plugin: 'chat-cigarette', key: 'lang' } as const, 'en' as La
 const HUMAN = new Set(['composer', 'bridge', 'sdk'])
 
 const METER_CELLS = 14
-const PAPER_CELLS = 26
 const RAMP = ['▃', '▄', '▅', '▆', '▇'] as const
+const HEAP = [' ', '▁', '▂', '▃', '▄', '▅', '▆'] as const
 
 function emptyDay(key: string): Day {
   return { key, butts: [], puffs: 0 }
@@ -101,10 +103,10 @@ function meterBar(pct: number | null): { used: string; left: string; label: stri
   return { used: '━'.repeat(on), left: '─'.repeat(METER_CELLS - on), label: `${Math.round(p)}%`.padStart(4, ' ') }
 }
 
-function jointPaper(cells: number): string {
-  let out = ''
-  for (let i = 0; i < cells; i++) out += RAMP[Math.min(4, Math.floor((i / PAPER_CELLS) * 5))]
-  return out
+// المكتة بالتيرمنال: كومة رماد بتعلى مع كل سحبة.
+function ashCells(ash: number): string {
+  const top = Math.round(ash * (HEAP.length - 1))
+  return [top - 2, top - 1, top, top - 1, top - 2].map(h => HEAP[Math.max(0, h)] ?? ' ').join('')
 }
 
 function parseStyle(args: string): Style | null {
@@ -304,8 +306,11 @@ export const register: Register = on => {
     const day = dayView(s, now)
     const isOut = s.puffs >= PUFFS
     const isUnlit = s.puffs === 0 && nightPhase(now) === 'dawn'
-    const line = tagline(kind, ln, s.puffs, now)
-    const warn = warning(kind, ln, s.puffs)
+    // كل سيجارة إلها رقم (من اليوم وكم عقب قبلها) — بتبلّش جملها وتحذيراتها من مكان جديد.
+    const seed = seedOf(day.key, isOut ? Math.max(0, day.butts.length - 1) : day.butts.length)
+    const line = tagline(kind, ln, s.puffs, now, seed)
+    const warns = warnings(kind, ln, s.puffs, seed)
+    const warn = warns[0] ?? ''
     const limitPct = lim !== null && !lim.isFresh ? Math.round(Math.min(100, lim.percent)) : null
     const card = stats(ln, day.butts.length, day.puffs, limitPct)
     const ms = meters(lim, ctx, now, ln)
@@ -343,7 +348,7 @@ export const register: Register = on => {
       return (
         <Box flexDirection="column" gap={1}>
           <Svg
-            source={scene({ kind, ln, puffs: s.puffs, warning: warn, butts: day.butts, isUnlit, stats: card })}
+            source={scene({ kind, ln, puffs: s.puffs, warnings: warns, butts: day.butts, isUnlit, stats: card, animated: !isWindows })}
             alt={
               isOut
                 ? `Chat ${noun} burned out — ${REST_LINE} — ${card}`
@@ -358,44 +363,63 @@ export const register: Register = on => {
 
     if (e.surface === 'terminal') {
       const { Box, Text } = $.ui.resolve(e)
+      // كرت بإطار مدوّر: عنوان وعدّاد · السيجارة والمكتة بآخر السطر · التحذير · الجملة · العدّادات.
+      const width = Math.max(48, Math.min(e.props.bodyColumns, 96))
+      const inner = width - 4
+      const paperCells = Math.max(14, Math.min(60, inner - 30))
       const f = Math.min(1, s.puffs / PUFFS)
-      const left = Math.round(PAPER_CELLS * (1 - f))
+      const left = Math.round(paperCells * (1 - f))
       const isJoint = kind === 'joint'
-      const filter = isJoint ? '#c9a374' : '#d0843a'
-      const tray = day.butts.slice(-10).map((b, i) => (
-        <Text key={`b${i}`} color={b === 'joint' ? '#c9a374' : '#d0843a'}>▬</Text>
-      ))
-      if (day.butts.length > 10) tray.push(<Text key="more" dimColor>{`+${day.butts.length - 10}`}</Text>)
+      const filter = isJoint ? '#b08b58' : '#d0843a'
+      const paper = isJoint
+        ? Array.from({ length: left }, (_, i) => RAMP[Math.min(4, Math.floor((i / paperCells) * 5))]).join('')
+        : '█'.repeat(left)
+
       const stick = isOut
         ? [
             <Text key="butt" color={filter}>{isJoint ? '▐≋≋' : '▐▓▓▓'}</Text>,
             ...(isJoint ? [] : [<Text key="ring" color="#d9b04f">▌</Text>]),
-            <Text key="out" color="#8a8580">░  💤 </Text>,
+            <Text key="out" color="#8a8580">░ 💤 </Text>,
             <Text key="rest" color="#b9a6ff" italic>{REST_LINE}</Text>,
           ]
         : [
             <Text key="cork" color={filter}>{isJoint ? '▐≋≋≋' : '▐▓▓▓▓'}</Text>,
             ...(isJoint ? [] : [<Text key="ring" color="#d9b04f">▌</Text>]),
-            <Text key="paper" color={isJoint ? '#e4e6c8' : '#f2ede4'}>
-              {isJoint ? jointPaper(left) : '█'.repeat(left)}
-            </Text>,
+            <Text key="paper" color={isJoint ? '#d9bf8f' : '#f2ede4'}>{paper}</Text>,
             ...(isUnlit
               ? [<Text key="unlit" color={isJoint ? '#5f7d3a' : '#8a5a2b'}>▌</Text>]
               : [
                   <Text key="ember" color={e.props.isWorking ? '#ffb347' : '#ff5a14'}>▌</Text>,
-                  <Text key="ash" color="#8a8580">▒░</Text>,
+                  <Text key="ashTip" color="#8a8580">▒░</Text>,
                   <Text key="smoke" dimColor>{e.props.isWorking ? ' ∿∿~' : ' ~'}</Text>,
                 ]),
-            <Text key="count" dimColor>{`  ${s.puffs}/${PUFFS}  `}</Text>,
           ]
+      const tray = [
+        <Text key="trayL" color="#8a7cc0">╰</Text>,
+        <Text key="ash" color="#9a948b">{ashCells(isOut ? 1 : f)}</Text>,
+        <Text key="trayR" color="#8a7cc0">╯</Text>,
+        ...day.butts.slice(-6).map((b, i) => (
+          <Text key={`b${i}`} color={b === 'joint' ? '#b08b58' : '#d0843a'}>▬</Text>
+        )),
+      ]
+      if (day.butts.length > 0) tray.push(<Text key="count" color="#c8b6ff" bold>{` ×${day.butts.length}`}</Text>)
+
       const rows = [
-        <Box key="stick" flexDirection="row">
-          {stick}
-          {tray}
+        <Box key="head" flexDirection="row" justifyContent="space-between">
+          <Text bold color="#c8b6ff">{KINDS[kind].title[ln]}</Text>
+          <Text dimColor>{`${s.puffs}/${PUFFS} ${PUFF_WORD[ln]}`}</Text>
+        </Box>,
+        <Box key="stick" flexDirection="row" justifyContent="space-between">
+          <Box flexDirection="row">{stick}</Box>
+          <Box flexDirection="row">{tray}</Box>
         </Box>,
       ]
-      if (!isOut) rows.push(<Text key="warn" inverse bold>{` ${warn} `}</Text>)
-      rows.push(<Text key="tag">{line}</Text>)
+      if (isOut) {
+        rows.push(<Text key="stats" color="#c8b6ff" bold>{card}</Text>)
+      } else {
+        rows.push(<Text key="warn" inverse bold wrap="truncate">{` ⚠ ${warn} `.padEnd(inner)}</Text>)
+      }
+      rows.push(<Text key="tag" wrap="truncate">{line}</Text>)
       for (const m of ms) {
         const b = meterBar(m.pct)
         rows.push(
@@ -406,12 +430,11 @@ export const register: Register = on => {
               <Text dimColor>{b.left}</Text>
             </Box>
             <Text bold color={m.color}>{b.label}</Text>
-            <Text dimColor>{m.text}</Text>
+            <Text dimColor wrap="truncate">{m.text}</Text>
           </Box>,
         )
       }
       if (isOut) {
-        rows.push(<Text key="stats" color="#c8b6ff" bold>{card}</Text>)
         rows.push(
           <Box key="share" flexDirection="row" gap={1}>
             <Text dimColor>{SHARE[ln]}</Text>
@@ -419,7 +442,11 @@ export const register: Register = on => {
           </Box>,
         )
       }
-      return <Box flexDirection="column">{rows}</Box>
+      return (
+        <Box flexDirection="column" width={width} borderStyle="round" borderColor="#5d4f86" paddingX={1}>
+          {rows}
+        </Box>
+      )
     }
 
     return next(e)

@@ -24,7 +24,7 @@ test('every message is a puff, and the band shows the count on both surfaces', a
   }
   const term = await $.ui.mount({ ...BAND, surface: 'terminal' })
   expect(await term.find({ type: 'Text', text: '3/20' })).toBeDefined()
-  expect(await term.find({ type: 'Text', text: /Good chat so far/ })).toBeDefined()
+  expect(await term.find({ type: 'Text', text: /Cigarette lit/ })).toBeUndefined()
   await term.unmount()
 
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
@@ -214,6 +214,17 @@ test('/smokehe turns the words Hebrew', async ($, on) => {
   await desk.unmount()
 })
 
+// نص الرسمة نفسها (بلا الوصف المخفي alt).
+function svgSource(n: unknown): string {
+  const e = n as { type?: string; props?: { source?: string }; children?: unknown[] }
+  if (e?.type === 'Svg') return e.props?.source ?? ''
+  for (const c of e?.children ?? []) {
+    const found = svgSource(c)
+    if (found) return found
+  }
+  return ''
+}
+
 const at = (h: number, m = 0) => new Date(2026, 9, 11, h, m).getTime()
 const complete = {
   answer: 'ok',
@@ -384,5 +395,59 @@ test('around 4am a new cigarette will not light, and the message still goes thro
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
   expect(await ui.find({ type: 'Text', text: '0/20' })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /4:30am\. The lighter refuses/ })).toBeDefined()
+  await ui.unmount()
+})
+
+test('all ten warnings live in the drawing and cycle by themselves; a still image shows one', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on)
+  mock.env(on, {})
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('command.register', () => ({ value: undefined }) as never)
+  on('session.usage', () => ({ value: { startedAt: 0, context: { window: 200000 }, rateLimits: [] } }) as never)
+  await $.session.start({ cwd: '/tmp', surface: 'desktop', isInteractive: true })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  const source = svgSource(await ui.drawn())
+  expect(source.split('WARNING:').length - 1).toBe(10)
+  expect(source).toContain('attributeName="opacity" dur="50s"')
+  await ui.unmount()
+})
+
+test('on Windows the warning strip shows a single warning', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on)
+  mock.env(on, { OS: 'Windows_NT' })
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('command.register', () => ({ value: undefined }) as never)
+  on('session.usage', () => ({ value: { startedAt: 0, context: { window: 200000 }, rateLimits: [] } }) as never)
+  await $.session.start({ cwd: '/tmp', surface: 'desktop', isInteractive: true })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(svgSource(await ui.drawn()).split('WARNING:').length - 1).toBe(1)
+  await ui.unmount()
+})
+
+test('every puff adds ash to the ashtray at the end', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  const ash: number[] = []
+  for (let i = 0; i < 4; i++) {
+    await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+    const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+    ash.push(Number(/data-ash=\\"([0-9.]+)\\"/.exec(JSON.stringify(await ui.drawn()))?.[1]))
+    await ui.unmount()
+  }
+  expect(ash).toEqual([0.05, 0.1, 0.15, 0.2])
+})
+
+test('the terminal band is a tidy framed card with the warning sign', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  await $.prompt.submit({ text: 'hi', wait: false, origin: { kind: 'composer' } })
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  const drawn = await ui.drawn()
+  expect(drawn).toMatchObject({ type: 'Box', props: { borderStyle: 'round' } })
+  expect(await ui.find({ type: 'Text', text: '⚠ WARNING:' })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: 'CHAT CIGARETTE' })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: '1/20 puffs' })).toBeDefined()
   await ui.unmount()
 })

@@ -70,9 +70,9 @@ function defs(night: number): string {
 <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${mix('#2a1d4e', '#120d26', night)}"/><stop offset="1" stop-color="${mix('#5b2f57', '#241a40', night)}"/></linearGradient>
 <linearGradient id="cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3b86d"/><stop offset=".5" stop-color="#d0843a"/><stop offset="1" stop-color="#94501d"/></linearGradient>
 <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f2ede4"/><stop offset="1" stop-color="#c9c0b0"/></linearGradient>
-<linearGradient id="rollPaper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf8ee"/><stop offset=".45" stop-color="#ebe6d2"/><stop offset="1" stop-color="#b9b394"/></linearGradient>
-<linearGradient id="herbTint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9dbb6a" stop-opacity=".05"/><stop offset=".6" stop-color="#6f9446" stop-opacity=".15"/><stop offset="1" stop-color="#4e6e30" stop-opacity=".26"/></linearGradient>
-<linearGradient id="crutch" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3c79c"/><stop offset=".55" stop-color="#c9a374"/><stop offset="1" stop-color="#9a7448"/></linearGradient>
+<linearGradient id="rollPaper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efdcb6"/><stop offset=".45" stop-color="#d9bf8f"/><stop offset="1" stop-color="#a4855a"/></linearGradient>
+<linearGradient id="herbTint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d7a3a" stop-opacity=".04"/><stop offset=".6" stop-color="#5f6a2c" stop-opacity=".12"/><stop offset="1" stop-color="#4a4a22" stop-opacity=".22"/></linearGradient>
+<linearGradient id="crutch" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d3b282"/><stop offset=".55" stop-color="#b08b58"/><stop offset="1" stop-color="#7f5d33"/></linearGradient>
 <linearGradient id="ash" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c2bdb6"/><stop offset="1" stop-color="#5f5953"/></linearGradient>
 <linearGradient id="jointAsh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d1cbbf"/><stop offset="1" stop-color="#6b6457"/></linearGradient>
 <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b0"/><stop offset=".5" stop-color="#d9b04f"/><stop offset="1" stop-color="#a77d22"/></linearGradient>
@@ -83,7 +83,9 @@ function defs(night: number): string {
 <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
 <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
 <pattern id="dots" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#6b3510" opacity=".45"/><circle cx="5.5" cy="5" r=".7" fill="#6b3510" opacity=".35"/></pattern>
-<pattern id="herb" width="9" height="7" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="2.5" r="1.1" fill="#4c7a2a" opacity=".5"/><circle cx="6" cy="5.2" r=".9" fill="#2f5419" opacity=".5"/><circle cx="7" cy="1.3" r=".6" fill="#86ad4a" opacity=".45"/><circle cx="3.6" cy="5.9" r=".55" fill="#5e4f27" opacity=".5"/></pattern>
+<pattern id="herb" width="9" height="7" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="2.5" r="1" fill="#55602a" opacity=".42"/><circle cx="6" cy="5.2" r=".85" fill="#3c4a1d" opacity=".42"/><circle cx="7" cy="1.3" r=".55" fill="#7d8a3e" opacity=".38"/><circle cx="3.6" cy="5.9" r=".5" fill="#5e4a27" opacity=".45"/></pattern>
+<pattern id="fiber" width="23" height="5" patternUnits="userSpaceOnUse"><line x1="0" y1="1" x2="14" y2="1.4" stroke="#f3e2bf" stroke-width=".5" opacity=".7"/><line x1="8" y1="3.6" x2="21" y2="3.2" stroke="#a88a5c" stroke-width=".45" opacity=".55"/></pattern>
+<linearGradient id="ashHeap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfc9c0"/><stop offset=".6" stop-color="#8e877d"/><stop offset="1" stop-color="#544e47"/></linearGradient>
 </defs>`
 }
 
@@ -96,11 +98,42 @@ function frame(h: number, night: number): string {
 
 // ───────────── تحذير الباكيت ─────────────
 
-// شريط أبيض بإطار أسود متل تحذيرات الباكيت الحقيقية.
-function warningStrip(text: string, ln: Lang): string {
-  const dir = ln === 'en' ? '' : ' direction="rtl"'
+// مثلث أصفر فيه علامة تعجب (⚠) — بأول الشريط من جهة القراية.
+function warnIcon(x: number, y: number): string {
+  return `<g transform="translate(${x} ${y})"><path d="M 0 -8.5 L 9.5 8 L -9.5 8 Z" fill="#ffd21f" stroke="#0b0b0b" stroke-width="1.8" stroke-linejoin="round"/>
+<rect x="-1.15" y="-3.6" width="2.3" height="6.6" rx="1" fill="#0b0b0b"/><circle cx="0" cy="5.4" r="1.25" fill="#0b0b0b"/></g>`
+}
+
+// شريط أبيض بإطار أسود متل تحذيرات الباكيت الحقيقية. بالرسمة المتحركة كل التحذيرات
+// جوّاته وبيتبدّلوا لحالهم كل 5 ثواني (بلا إعادة تحميل)؛ بالصورة الثابتة بيبيّن الأول بس.
+function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): string {
+  const rtl = ln !== 'en'
+  const tx = rtl ? 552 : 48
+  const attrs = `x="${tx}" y="25.6" text-anchor="start"${rtl ? ' direction="rtl"' : ''} font-family="'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#0b0b0b"`
+  const list = animated ? texts : texts.slice(0, 1)
+  const n = list.length
+  const each = 5
+  const T = n * each
+  const e = (0.35 / T).toFixed(4)
+  const lines = list
+    .map((t, i) => {
+      if (n === 1) return `<text ${attrs}>${esc(t)}</text>`
+      const a = (i / n).toFixed(4)
+      const b = ((i + 1) / n).toFixed(4)
+      const ae = (i / n + Number(e)).toFixed(4)
+      const be = ((i + 1) / n - Number(e)).toFixed(4)
+      const anim =
+        i === 0
+          ? `values="1;1;0;0;1" keyTimes="0;${be};${b};${(1 - Number(e)).toFixed(4)};1"`
+          : i === n - 1
+            ? `values="0;0;1;1;0" keyTimes="0;${a};${ae};${be};1"`
+            : `values="0;0;1;1;0;0" keyTimes="0;${a};${ae};${be};${b};1"`
+      return `<text ${attrs} opacity="${i === 0 ? 1 : 0}">${esc(t)}<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" ${anim}/></text>`
+    })
+    .join('\n')
   return `<rect x="16" y="9" width="568" height="25" rx="2" fill="#f6f3ec" stroke="#0b0b0b" stroke-width="2.5"/>
-<text x="300" y="25.6" text-anchor="middle"${dir} font-family="'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#0b0b0b">${esc(text)}</text>`
+${warnIcon(rtl ? 570 : 30, 21.5)}
+${lines}`
 }
 
 // ───────────── السيجارة والجوينت ─────────────
@@ -148,7 +181,7 @@ function jointBody(x0: number, end: number, cy: number, hh0: number, hh: number)
     const x = x0 + (end - x0) * k
     if (end - x0 > 40) {
       const half = hh0 + (hh - hh0) * k
-      folds += `<line x1="${x.toFixed(1)}" y1="${(cy - half + 1).toFixed(1)}" x2="${(x + 7).toFixed(1)}" y2="${(cy + half - 1).toFixed(1)}" stroke="#cfc8ad" stroke-width=".9" opacity=".8"/>`
+      folds += `<line x1="${x.toFixed(1)}" y1="${(cy - half + 1).toFixed(1)}" x2="${(x + 7).toFixed(1)}" y2="${(cy + half - 1).toFixed(1)}" stroke="#c4a679" stroke-width=".9" opacity=".8"/>`
     }
   }
   return `
@@ -158,8 +191,9 @@ function jointBody(x0: number, end: number, cy: number, hh0: number, hh: number)
 <path d="${cone}" fill="url(#rollPaper)"/>
 <path d="${cone}" fill="url(#herbTint)"/>
 <path d="${cone}" fill="url(#herb)"/>
+<path d="${cone}" fill="url(#fiber)"/>
 ${folds}
-<line x1="${x0}" y1="${cy - hh0 + 2.5}" x2="${end.toFixed(1)}" y2="${(cy - hh + 3).toFixed(1)}" stroke="#ffffff" stroke-width=".9" opacity=".85"/>`
+<line x1="${x0}" y1="${cy - hh0 + 2.5}" x2="${end.toFixed(1)}" y2="${(cy - hh + 3).toFixed(1)}" stroke="#f6e8c8" stroke-width=".9" opacity=".9"/>`
 }
 
 // العنوان والعدّاد: إنجليزي (العنوان يسار) أو عربي/عبري (العنوان يمين، متل الكتابة).
@@ -180,7 +214,7 @@ function buttShape(kind: Style, x: number, y: number, rot: number, scale: number
     kind === 'joint'
       ? `<rect x="-11" y="-3.2" width="14" height="6.4" rx="1.6" fill="url(#crutch)"/>` +
         `<line x1="-7" y1="-3.2" x2="-4" y2="3.2" stroke="#7a5631" opacity=".6"/>` +
-        `<path d="M 3 -3.2 L 9 -3.8 L 9 3.8 L 3 3.2 Z" fill="#ebe6d2"/><path d="M 3 -3.2 L 9 -3.8 L 9 3.8 L 3 3.2 Z" fill="url(#herbTint)"/>` +
+        `<path d="M 3 -3.2 L 9 -3.8 L 9 3.8 L 3 3.2 Z" fill="#d9bf8f"/><path d="M 3 -3.2 L 9 -3.8 L 9 3.8 L 3 3.2 Z" fill="url(#herbTint)"/>` +
         `<path d="M 9 -3.8 L 12 -2 L 10.5 0 L 12.5 2.4 L 9 3.8 Z" fill="#4a443f"/>`
       : `<rect x="-12" y="-3.6" width="17" height="7.2" rx="1.8" fill="url(#cork)"/>` +
         `<rect x="5" y="-3.6" width="1.6" height="7.2" fill="url(#gold)"/>` +
@@ -189,22 +223,51 @@ function buttShape(kind: Style, x: number, y: number, rot: number, scale: number
   return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot}) scale(${scale})">${body}</g>`
 }
 
-// المنفضة الصغيرة جنب السيجارة: كل عقب خلص اليوم بيضل فيها.
-function miniTray(butts: readonly Style[]): string {
-  const cx = 566
-  const cy = 100
+// كومة الرماد: قبّة مدوّرة بتكبر مع كل سحبة (ash من 0 لـ1)، وعليها حبيبات فاتحة وغامقة.
+function ashHeap(cx: number, base: number, maxW: number, maxH: number, ash: number): string {
+  if (ash <= 0) return ''
+  const w = 3 + (maxW - 3) * Math.sqrt(ash)
+  const h = 1.5 + (maxH - 1.5) * ash
+  let specks = ''
+  const count = Math.round(4 + 14 * ash)
+  for (let i = 0; i < count; i++) {
+    const t = ((i * 0.618) % 1) * 2 - 1
+    const x = cx + t * w * 0.75
+    const y = base - (1 - t * t) * h * (0.25 + ((i * 7) % 6) / 10)
+    specks += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(0.5 + ((i * 3) % 4) * 0.14).toFixed(2)}" fill="${i % 3 === 0 ? '#3d3833' : '#e6e1d9'}" opacity=".85"/>`
+  }
+  return `<path d="M ${(cx - w).toFixed(1)} ${base} C ${(cx - w * 0.55).toFixed(1)} ${(base - h * 1.35).toFixed(1)} ${(cx + w * 0.55).toFixed(1)} ${(base - h * 1.35).toFixed(1)} ${(cx + w).toFixed(1)} ${base} Z" fill="url(#ashHeap)"/>${specks}`
+}
+
+// المكتة (المنفضة) بآخر السيجارة: الرماد فيها بيزيد مع كل سحبة، وأعقاب اليوم بتضل فيها.
+function ashtray(butts: readonly Style[], ash: number): string {
+  const cx = 532
+  const cy = 82
   const n = butts.length
   const shown = butts.slice(-5)
-  let out = `<g data-butts="${n}" opacity="${n > 0 ? 1 : 0.5}">
-<ellipse cx="${cx}" cy="${cy}" rx="25" ry="7" fill="url(#tray)" stroke="#7d6fb4" stroke-width="1"/>
-<ellipse cx="${cx}" cy="${cy - 1}" rx="19" ry="3.6" fill="#1a1430"/>`
+  let out = `<g data-butts="${n}" data-ash="${ash.toFixed(2)}">
+<ellipse cx="${cx}" cy="${cy + 3}" rx="48" ry="11" fill="#000" opacity=".3" filter="url(#blur)"/>
+<ellipse cx="${cx}" cy="${cy}" rx="46" ry="12" fill="url(#tray)" stroke="#8a7cc0" stroke-width="1.2"/>
+<ellipse cx="${cx}" cy="${cy - 1.5}" rx="37" ry="7.5" fill="#1a1430"/>
+<rect x="${cx - 47}" y="${cy - 3.2}" width="9" height="4" rx="2" fill="#1a1430"/>
+<rect x="${cx + 38}" y="${cy - 3.2}" width="9" height="4" rx="2" fill="#1a1430"/>
+${ashHeap(cx - 2, cy + 1.5, 24, 10, ash)}`
   shown.forEach((b, i) => {
-    out += buttShape(b, cx - 13 + i * 6.5, cy - 3 + (i % 2) * 1.5, -24 + i * 12, 0.7)
+    out += buttShape(b, cx - 18 + i * 8.5, cy - 2 + (i % 2) * 2, -22 + i * 11, 0.82)
   })
   if (n > 0) {
-    out += `<text x="${cx}" y="${cy - 11}" text-anchor="middle" font-family="${FONT}" font-size="9.5" font-weight="700" fill="#c8b6ff">×${n}</text>`
+    out += `<text x="${cx + 40}" y="${cy - 15}" text-anchor="middle" font-family="${FONT}" font-size="10" font-weight="700" fill="#c8b6ff">×${n}</text>`
   }
   return out + '</g>'
+}
+
+// ذرّة رماد بتوقع من الجمرة كل كم ثانية — وإذا الجمرة قريبة، بتوقع جوّا المكتة.
+function fallingAsh(fromX: number, fromY: number): string {
+  const dx = Math.max(0, Math.min(52, 528 - fromX)).toFixed(1)
+  const dy = (fromX > 440 ? 78 - fromY : 20).toFixed(1)
+  return `<circle cx="${fromX.toFixed(1)}" cy="${fromY.toFixed(1)}" r="1.4" fill="#b9b3aa" opacity="0">
+<animate attributeName="opacity" values="0;.9;.9;0" keyTimes="0;.1;.85;1" dur="4.2s" begin="1s" repeatCount="indefinite"/>
+<animateTransform attributeName="transform" type="translate" values="0 0; ${(Number(dx) * 0.35).toFixed(1)} ${(Number(dy) * 0.15).toFixed(1)}; ${dx} ${dy}" keyTimes="0;.45;1" dur="4.2s" begin="1s" repeatCount="indefinite"/></circle>`
 }
 
 // المنفضة الكبيرة بكرت المشاركة: أعقاب اليوم كلها مفروشة فيها.
@@ -215,7 +278,8 @@ function bigTray(butts: readonly Style[]): string {
   const spacing = Math.min(30, 230 / Math.max(1, m))
   let out = `<g data-butts="${n}">
 <ellipse cx="300" cy="120" rx="150" ry="17" fill="url(#tray)" stroke="#7d6fb4" stroke-width="1.2"/>
-<ellipse cx="300" cy="118" rx="124" ry="10" fill="#1a1430"/>`
+<ellipse cx="300" cy="118" rx="124" ry="10" fill="#1a1430"/>
+${ashHeap(300, 122, 70, 15, 1)}`
   shown.forEach((b, i) => {
     const x = 300 + (i - (m - 1) / 2) * spacing
     const y = 114 + (i % 2 ? 5 : 0)
@@ -234,21 +298,23 @@ export type Scene = {
   kind: Style
   ln: Lang
   puffs: number
-  warning: string
+  warnings: readonly string[]
   butts: readonly Style[]
   isUnlit: boolean
   stats: string
+  animated: boolean
 }
 
 export function scene(s: Scene): string {
   const f = Math.min(1, s.puffs / PUFFS)
   if (f >= 1) return burnedOut(s)
-  return frame(142, f) + warningStrip(s.warning, s.ln) + `<g transform="translate(0 30)">${burning(s, f)}</g></svg>`
+  return frame(142, f) + warningStrip(s.warnings, s.ln, s.animated) + `<g transform="translate(0 30)">${burning(s, f)}</g></svg>`
 }
 
 function burning(s: Scene, f: number): string {
   const cy = 54
-  const px1 = 520
+  // السيجارة أقصر شوي عشان المكتة تقعد بآخرها.
+  const px1 = 462
   const isJoint = s.kind === 'joint'
 
   let end: number
@@ -278,7 +344,8 @@ function burning(s: Scene, f: number): string {
     if (isJoint) smoke += wisp(sx + 8, top - 3, dur / 2, dur * 1.2, 3.6, -1)
     lit =
       tip(end, cy, hh, isJoint) +
-      `<g filter="url(#blur)" stroke="${isJoint ? '#dfe8d4' : '#ddd6f3'}" fill="none" stroke-linecap="round">${smoke}</g>`
+      `<g filter="url(#blur)" stroke="${isJoint ? '#e6e2d2' : '#ddd6f3'}" fill="none" stroke-linecap="round">${smoke}</g>` +
+      fallingAsh(end + 14, cy + hh - 2)
   }
 
   // صف النَّفَسات: المحروق برتقالي، الجاي فاضي، وآخر واحد بينبض.
@@ -300,7 +367,7 @@ ${header(s.kind, s.puffs, s.ln)}
 ${stick}
 ${lit}
 ${dots}
-${miniTray(s.butts)}`
+${ashtray(s.butts, f)}`
 }
 
 // كرت المشاركة: «روح ارتاح»، أرقام اليوم، المنفضة بكل أعقاب اليوم، وسطر التركيب.

@@ -37,10 +37,10 @@ claude plugin update chat-cigarette@chat-cigarette
 | | |
 |---|---|
 | 🔥 كل رسالة = نَفَس | 20 نَفَس بالسيجارة. الإشعارات ورسائل البرامج ما بتنحسب |
-| ⚠️ تحذير الباكيت | شريط أبيض بإطار أسود متل الباكيت الحقيقي، وتحذير جديد مع كل نَفَس («WARNING: Your manager can smell this commit») |
-| 💬 جملة جديدة | 18 جملة بكل لغة: بالأول خفيفة، بالنص «قوم تحرّك»، بالآخر «جهّز حالك ترتاح» |
+| ⚠️ تحذير الباكيت | شريط أبيض بإطار أسود ومثلث ⚠️ متل الباكيت الحقيقي. 10 تحذيرات بكل لغة جوّا الرسمة، وبيتبدّلوا **لحالهم** كل 5 ثواني («WARNING: Your manager can smell this commit») |
+| 💬 جملة جديدة | **50 جملة بكل لغة**: بالأول خفيفة، بالنص «قوم تحرّك»، بالآخر «جهّز حالك ترتاح». كل سيجارة بتبلّش من مكان جديد، عشان ما تزهق |
 | 🌆 السما | بتبلّش غروب وبتغمق لليل مع كل نَفَس |
-| 🧺 المنفضة | كل سيجارة بتخلص بتترك عقب بالمنفضة الصغيرة، والمنفضة بتضل لآخر اليوم (اليوم بيبلّش 5 الصبح). شغلك اليومي معدود بالأعقاب |
+| 🧺 المكتة | مكتة (منفضة) بآخر السيجارة: كومة الرماد فيها بتكبر مع **كل سحبة**، وذرّات رماد بتوقع من الجمرة. وكل سيجارة بتخلص بتترك عقب بيضل لآخر اليوم (اليوم بيبلّش 5 الصبح) |
 | 📸 كرت المشاركة | لما تخلص: «It's time to get some rest»، أرقام اليوم (أعقاب · نَفَسات · الحدّ)، كل أعقاب اليوم بالمنفضة، وسطر التركيب. كل صورة شاشة بتصير دعاية |
 | 🌿 الجوينت بيروق | من النَّفَس 14، كلود بيختم كل رد بسطر رايق. الشغل نفسه بيضل بنفس الدقة |
 | ⏳ حدّ الـ5 ساعات | `⏳ ━━━━━━──────── 42%  5-hour limit · resets in 2h 15m` |
@@ -70,7 +70,8 @@ claude plugin validate .
 بيعدّد كل إشي المود بيستعمله: `$.clock`, `$.command.register`, `$.env.get` (OS), `$.session.usage`, `$.state`, `$.store`, `$.ui.resolve`, `$.ui.toast`. ما في `$.http` ولا `$.process` ولا `$.fs`.
 
 - **Desktop app:** an animated SVG. On **Windows** it is a still image, because the animated version reloads on every change and blinks out for a moment there.
-- **Terminal:** a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~  7/20  ▬▬▬` or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`, the warning in reverse video, and the same meters.
+- **Terminal:** a framed card: title and puff count, a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~` (or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`) with the ashtray `╰▁▂▃▂▁╯▬▬ ×2` at the end, the warning as a full reverse-video bar `⚠ WARNING: …`, the line, and the meters.
+- **Joint:** unbleached, RAW-style rolling paper and tip.
 
 ## بدك سيجارة أطول أو أقصر؟
 
