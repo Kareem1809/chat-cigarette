@@ -1,0 +1,13 @@
+{
+  "name": "chat-cigarette",
+  "description": "A cigarette that burns down with every message to Claude — when it's out: it's time to get some rest 🍁",
+  "owner": {
+    "name": "Kareem1809"
+  },
+  "plugins": [
+    {
+      "name": "chat-cigarette",
+      "source": "./"
+    }
+  ]
+}

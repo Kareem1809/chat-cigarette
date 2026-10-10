@@ -1,0 +1,11 @@
+{
+  "name": "chat-cigarette",
+  "version": "0.1.0",
+  "description": "سيجارة بتحترق مع كل رسالة لكلود — لما تخلص: it's time to get some rest",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Kareem1809"
+  },
+  "repository": "https://github.com/Kareem1809/chat-cigarette",
+  "license": "MIT"
+}
