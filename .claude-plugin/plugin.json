@@ -1,6 +1,6 @@
 {
   "name": "chat-cigarette",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "سيجارة 🚬 أو جوينت 🌿 بتحترق مع كل رسالة لكلود — لما تخلص: it's time to get some rest",
   "types": "./types/index.d.ts",
   "author": {

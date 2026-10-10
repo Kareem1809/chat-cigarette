@@ -183,3 +183,30 @@ test('/smokear turns the words Arabic and /smokeen turns them back', async ($, o
   expect(await ui.find({ type: 'Text', text: /Cigarette lit/ })).toBeDefined()
   await ui.unmount()
 })
+
+test('/smokehe turns the words Hebrew', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  on('session.measure', ($, e) => ({ changed: e.changed }))
+  await $.session.measure({
+    context: { window: 200000 },
+    rateLimits: [{ kind: 'five_hour', percentUsed: 42 }],
+    changed: ['rateLimits'],
+  })
+  const r = await $.command.run({
+    command: 'smokehe',
+    args: '',
+    origin: { kind: 'composer' },
+    presentation: { isFullscreen: false, columns: 80 },
+  })
+  expect(r.text).toContain('בעברית')
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const ui = await $.ui.mount({ ...BAND, surface })
+    expect(await ui.find({ type: 'Text', text: /הדלקנו סיגריה/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'מגבלת 5 השעות' })).toBeDefined()
+    await ui.unmount()
+  }
+  const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(JSON.stringify(await desk.drawn())).toContain('סיגריית השיחה')
+  await desk.unmount()
+})

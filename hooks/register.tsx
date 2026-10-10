@@ -1,7 +1,7 @@
 // شو هاد؟ «سيجارة المحادثة»: أول كل شات بتنولّع سيجارة (أو جوينت — /smoke بيبدّل)
 // فوق خانة الكتابة، وكل رسالة منك لكلود = نَفَس، ومع كل نَفَس جملة جديدة.
 // لما تخلص، كلود بيقلك: It's time to get some rest. ليش؟ يخفف قعدة الحاسوب.
-// الكتابة إنجليزي افتراضياً؛ /smokear بيقلبها عربي و /smokeen بيرجّعها إنجليزي.
+// الكتابة إنجليزي افتراضياً؛ /smokear عربي · /smokehe عبري · /smokeen بيرجّعها إنجليزي.
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
@@ -79,25 +79,61 @@ const LINES: Record<Lang, Lines> = {
       '⌛ ضايل كم نَفَس بس',
     ],
   },
+  he: {
+    early: [
+      '☕ רק התחלנו — תהנה מהשיחה',
+      '🌤️ נשאר עוד הרבה — קח את זה בקלות',
+      '🎧 לאט ובנחת — אין לחץ',
+      '💬 שיחה טובה עד עכשיו — תשמור על זה קליל',
+      '🪟 תציץ רגע מהחלון — העיניים יודו לך',
+      '💧 תשתה קצת מים בין שאכטה לשאכטה',
+    ],
+    mid: [
+      '🌬️ תנשום גם קצת אוויר אמיתי',
+      '🧘 תזיז את הכתפיים, תשחרר את הלסת',
+      '⏳ הגענו לחצי — ההפסקה מתקרבת',
+      '👀 תסתכל על משהו רחוק 20 שניות',
+      '🚶 קום תמתח את הרגליים אחרי זה',
+      '🍃 לאט לאט — המסך לא בורח לשום מקום',
+    ],
+    late: [
+      '🕯️ עוד כמה שאכטות — תתכונן לנוח',
+      '🌙 עוד מעט מסיימים — תשמור את העבודה',
+      '🔥 כמעט הגענו לסוף',
+      '📌 תרשום איפה עצרת — תמשיך מחר',
+      '🛏️ המיטה מתגעגעת אליך',
+      '⌛ נשארו רק עוד כמה',
+    ],
+  },
 }
 
 const KINDS: Record<Style, { noun: string; title: Record<Lang, string>; lit: Record<Lang, string>; out: Record<Lang, string> }> = {
   cigarette: {
     noun: 'cigarette',
-    title: { en: 'CHAT CIGARETTE', ar: 'سيجارة المحادثة' },
-    lit: { en: '🔥 Cigarette lit — every message is a puff', ar: '🔥 ولّعنا السيجارة — كل رسالة منك نَفَس' },
+    title: { en: 'CHAT CIGARETTE', ar: 'سيجارة المحادثة', he: 'סיגריית השיחה' },
+    lit: {
+      en: '🔥 Cigarette lit — every message is a puff',
+      ar: '🔥 ولّعنا السيجارة — كل رسالة منك نَفَس',
+      he: '🔥 הדלקנו סיגריה — כל הודעה היא שאכטה',
+    },
     out: {
       en: '🍁 Cigarette burned out — close the screen and go rest',
       ar: '🍁 خلصت السيجارة… سكّر الشاشة وروح ارتاح',
+      he: '🍁 הסיגריה נגמרה — תסגור את המסך ולך לנוח',
     },
   },
   joint: {
     noun: 'joint',
-    title: { en: 'CHAT JOINT', ar: 'جوينت المحادثة' },
-    lit: { en: '🔥 Joint lit — every message is a puff', ar: '🔥 ولّعنا الجوينت — كل رسالة منك نَفَس' },
+    title: { en: 'CHAT JOINT', ar: 'جوينت المحادثة', he: 'ג׳וינט השיחה' },
+    lit: {
+      en: '🔥 Joint lit — every message is a puff',
+      ar: '🔥 ولّعنا الجوينت — كل رسالة منك نَفَس',
+      he: '🔥 הדלקנו ג׳וינט — כל הודעה היא שאכטה',
+    },
     out: {
       en: '🍁 Joint burned out — close the screen and go rest',
       ar: '🍁 خلص الجوينت… سكّر الشاشة وروح ارتاح',
+      he: '🍁 הג׳וינט נגמר — תסגור את המסך ולך לנוח',
     },
   },
 }
@@ -126,16 +162,18 @@ function limitColor(pct: number): string {
   return pct < 50 ? '#5fd3a5' : pct < 80 ? '#ffb347' : '#ff5a5f'
 }
 
-const LIMIT_LABEL: Record<Lang, string> = { en: '⏳ 5-hour limit', ar: '⏳ حدّ الـ5 ساعات' }
+const LIMIT_LABEL: Record<Lang, string> = { en: '⏳ 5-hour limit', ar: '⏳ حدّ الـ5 ساعات', he: '⏳ מגבלת 5 השעות' }
 
-// «resets in 2h 15m» / «بيتجدد بعد 2س 15د» — فاضي إذا ما في وقت تجديد.
+// «resets in 2h 15m» / «بيتجدد بعد 2س 15د» / «מתאפס בעוד 2 ש׳ 15 ד׳» — فاضي إذا ما في وقت تجديد.
 function resetsIn(lim: Exclude<Limit, null>, now: number, ln: Lang): string {
   const at = lim.resetsAt ? Date.parse(lim.resetsAt) : NaN
   if (!Number.isFinite(at) || at <= now) return ''
   const mins = Math.round((at - now) / 60000)
   const h = Math.floor(mins / 60)
   const m = mins % 60
-  return ln === 'ar' ? `بيتجدد بعد ${h}س ${m}د` : `resets in ${h}h ${m}m`
+  if (ln === 'ar') return `بيتجدد بعد ${h}س ${m}د`
+  if (ln === 'he') return `מתאפס בעוד ${h} ש׳ ${m} ד׳`
+  return `resets in ${h}h ${m}m`
 }
 
 const LIMIT_CELLS = 14
@@ -275,10 +313,10 @@ ${folds}
 <line x1="${x0}" y1="${cy - hh0 + 2.5}" x2="${end.toFixed(1)}" y2="${(cy - hh + 3).toFixed(1)}" stroke="#ffffff" stroke-width=".9" opacity=".9"/>`
 }
 
-// العنوان والعدّاد: إنجليزي (العنوان يسار) أو عربي (العنوان يمين، متل الكتابة).
+// العنوان والعدّاد: إنجليزي (العنوان يسار) أو عربي/عبري (العنوان يمين، متل الكتابة).
 function header(kind: Style, puffs: number, ln: Lang): string {
-  if (ln === 'ar') {
-    return `<text x="572" y="23" text-anchor="end" font-family="${FONT}" font-size="12" font-weight="700" fill="#a99ccf">${KINDS[kind].title.ar}</text>
+  if (ln !== 'en') {
+    return `<text x="572" y="23" text-anchor="end" font-family="${FONT}" font-size="12" font-weight="700" fill="#a99ccf">${KINDS[kind].title[ln]}</text>
 <text x="28" y="23" font-family="${FONT}" font-size="11" font-weight="600" letter-spacing="1.6" fill="#a99ccf">${puffs} / ${PUFFS}</text>`
   }
   return `<text x="28" y="22" font-family="${FONT}" font-size="10" font-weight="600" letter-spacing="2.6" fill="#a99ccf">${KINDS[kind].title[ln]}</text>
@@ -418,7 +456,7 @@ export const register: Register = on => {
     // الافتراضي سيجارة بالإنجليزي؛ اختيارك (/smoke · /smokear · /smokeen) بيضل محفوظ.
     const [savedKind, savedLang] = await Promise.all([$.store.get('kind'), $.store.get('lang')])
     if (savedKind === 'joint' || savedKind === 'cigarette') await update($, style, () => savedKind)
-    if (savedLang === 'ar' || savedLang === 'en') await update($, lang, () => savedLang)
+    if (savedLang === 'ar' || savedLang === 'en' || savedLang === 'he') await update($, lang, () => savedLang)
     await Promise.all([
       $.command.register({
         name: 'smoke',
@@ -427,6 +465,7 @@ export const register: Register = on => {
         immediate: true,
       }),
       $.command.register({ name: 'smokear', description: 'Chat cigarette in Arabic — بالعربي', immediate: true }),
+      $.command.register({ name: 'smokehe', description: 'Chat cigarette in Hebrew — בעברית', immediate: true }),
       $.command.register({ name: 'smokeen', description: 'Chat cigarette in English', immediate: true }),
       $.command.register({ name: 'smokeng', description: 'Chat cigarette in English (same as /smokeen)', immediate: true }),
     ])
@@ -439,17 +478,22 @@ export const register: Register = on => {
     await update($, style, () => want)
     await $.store.set('kind', want)
     const said = {
-      joint: { en: '🌿 Switched to the chat joint.', ar: '🌿 صار جوينت.' },
-      cigarette: { en: '🚬 Switched to the chat cigarette.', ar: '🚬 صارت سيجارة.' },
+      joint: { en: '🌿 Switched to the chat joint.', ar: '🌿 صار جوينت.', he: '🌿 עברנו לג׳וינט.' },
+      cigarette: { en: '🚬 Switched to the chat cigarette.', ar: '🚬 صارت سيجارة.', he: '🚬 עברנו לסיגריה.' },
     }
     return { text: said[want][ln] }
   })
 
-  on('command.run', { command: ['smokear', 'smokeen', 'smokeng'] }, async ($, e) => {
-    const want: Lang = e.command === 'smokear' ? 'ar' : 'en'
+  on('command.run', { command: ['smokear', 'smokehe', 'smokeen', 'smokeng'] }, async ($, e) => {
+    const want: Lang = e.command === 'smokear' ? 'ar' : e.command === 'smokehe' ? 'he' : 'en'
     await update($, lang, () => want)
     await $.store.set('lang', want)
-    return { text: want === 'ar' ? '🇸🇾 صارت الكتابة بالعربي.' : '🇬🇧 Chat cigarette is in English now.' }
+    const said: Record<Lang, string> = {
+      en: '🔤 Chat cigarette is in English now.',
+      ar: '🔤 صارت الكتابة بالعربي.',
+      he: '🔤 הכתיבה עכשיו בעברית.',
+    }
+    return { text: said[want] }
   })
 
   on('prompt.submit', async ($, e, next) => {

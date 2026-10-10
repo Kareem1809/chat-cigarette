@@ -34,11 +34,11 @@ A Claude Code mod for smokers (and everyone else) who want to spend less time at
 | 🍁 آخر نَفَس | كلود بيجاوبك وبيختم بـ «It's time to get some rest 🍁» + إشعار |
 | 🧹 `/clear` | سيجارة جديدة |
 | 🔁 `/smoke` | بدّل بين السيجارة والجوينت (`/smoke joint` · `/smoke cigarette`) |
-| 🔤 `/smokear` · `/smokeen` | الكتابة عربي أو إنجليزي (الافتراضي: سيجارة بالإنجليزي) — وكل اختيار بينحفظ للجلسات الجاية |
+| 🔤 `/smokeen` · `/smokear` · `/smokehe` | الكتابة إنجليزي، عربي أو عبري (الافتراضي: سيجارة بالإنجليزي) — وكل اختيار بينحفظ للجلسات الجاية |
 
 - **Desktop app:** an animated SVG (smoke, glowing ember, puff dots). On **Windows** it is drawn as a still image: the animated version reloads on every change and blinks out for a moment there.
 - **Terminal:** a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~  7/20` or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`.
-- **Both:** a new status line with every message (English by default, `/smokear` for Arabic, `/smokeen` back) and the 5-hour limit, `⏳ 5-hour limit ━━━━━━─────── 42% · resets in 2h 15m`.
+- **Both:** a new status line with every message (English by default, `/smokear` Arabic, `/smokehe` Hebrew, `/smokeen` back to English) and the 5-hour limit, `⏳ 5-hour limit ━━━━━━─────── 42% · resets in 2h 15m`.
 - The sky goes from dusk to night as it burns.
 
 ## التحديث — Update
