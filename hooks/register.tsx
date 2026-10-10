@@ -383,7 +383,12 @@ export const register: Register = on => {
             <Text key="rest" color="#b9a6ff" italic>{REST_LINE}</Text>,
           ]
         : [
-            <Text key="cork" color={filter}>{isJoint ? '▐≋≋≋' : '▐▓▓▓▓'}</Text>,
+            ...(isJoint
+              ? [
+                  <Text key="cork" color={filter}>▐</Text>,
+                  <Text key="raw" bold color="#3a2512" backgroundColor={filter}>RAW</Text>,
+                ]
+              : [<Text key="cork" color={filter}>▐▓▓▓▓</Text>]),
             ...(isJoint ? [] : [<Text key="ring" color="#d9b04f">▌</Text>]),
             <Text key="paper" color={isJoint ? '#d9bf8f' : '#f2ede4'}>{paper}</Text>,
             ...(isUnlit
@@ -417,7 +422,12 @@ export const register: Register = on => {
       if (isOut) {
         rows.push(<Text key="stats" color="#c8b6ff" bold>{card}</Text>)
       } else {
-        rows.push(<Text key="warn" inverse bold wrap="truncate">{` ⚠ ${warn} `.padEnd(inner)}</Text>)
+        rows.push(
+          <Box key="warn" flexDirection="row">
+            <Text inverse bold color="#e0312b">{' ⚠ '}</Text>
+            <Text inverse bold wrap="truncate">{` ${warn} `.padEnd(inner - 3)}</Text>
+          </Box>,
+        )
       }
       rows.push(<Text key="tag" wrap="truncate">{line}</Text>)
       for (const m of ms) {

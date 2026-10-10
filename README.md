@@ -37,7 +37,7 @@ claude plugin update chat-cigarette@chat-cigarette
 | | |
 |---|---|
 | 🔥 كل رسالة = نَفَس | 20 نَفَس بالسيجارة. الإشعارات ورسائل البرامج ما بتنحسب |
-| ⚠️ تحذير الباكيت | شريط أبيض بإطار أسود ومثلث ⚠️ متل الباكيت الحقيقي. 10 تحذيرات بكل لغة جوّا الرسمة، وبيتبدّلوا **لحالهم** كل 5 ثواني («WARNING: Your manager can smell this commit») |
+| ⚠️ تحذير الباكيت | شريط أبيض بإطار أسود ومثلث أحمر ⚠️ متل الباكيت الحقيقي. 10 تحذيرات بكل لغة جوّا الرسمة، وبيتبدّلوا **لحالهم** كل 5 ثواني («WARNING: Your manager can smell this commit») |
 | 💬 جملة جديدة | **50 جملة بكل لغة**: بالأول خفيفة، بالنص «قوم تحرّك»، بالآخر «جهّز حالك ترتاح». كل سيجارة بتبلّش من مكان جديد، عشان ما تزهق |
 | 🌆 السما | بتبلّش غروب وبتغمق لليل مع كل نَفَس |
 | 🧺 المكتة | مكتة (منفضة) بآخر السيجارة: كومة الرماد فيها بتكبر مع **كل سحبة**، وذرّات رماد بتوقع من الجمرة. وكل سيجارة بتخلص بتترك عقب بيضل لآخر اليوم (اليوم بيبلّش 5 الصبح) |
@@ -71,7 +71,7 @@ claude plugin validate .
 
 - **Desktop app:** an animated SVG. On **Windows** it is a still image, because the animated version reloads on every change and blinks out for a moment there.
 - **Terminal:** a framed card: title and puff count, a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~` (or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`) with the ashtray `╰▁▂▃▂▁╯▬▬ ×2` at the end, the warning as a full reverse-video bar `⚠ WARNING: …`, the line, and the meters.
-- **Joint:** unbleached, RAW-style rolling paper and tip.
+- **Joint:** unbleached, RAW-style rolling paper (no specks) and a tip that says RAW.
 
 ## بدك سيجارة أطول أو أقصر؟
 

@@ -98,10 +98,10 @@ function frame(h: number, night: number): string {
 
 // ───────────── تحذير الباكيت ─────────────
 
-// مثلث أصفر فيه علامة تعجب (⚠) — بأول الشريط من جهة القراية.
+// مثلث أحمر فيه علامة تعجب بيضا (⚠) — بأول الشريط من جهة القراية (كريم: أحمر مش أصفر).
 function warnIcon(x: number, y: number): string {
-  return `<g transform="translate(${x} ${y})"><path d="M 0 -8.5 L 9.5 8 L -9.5 8 Z" fill="#ffd21f" stroke="#0b0b0b" stroke-width="1.8" stroke-linejoin="round"/>
-<rect x="-1.15" y="-3.6" width="2.3" height="6.6" rx="1" fill="#0b0b0b"/><circle cx="0" cy="5.4" r="1.25" fill="#0b0b0b"/></g>`
+  return `<g transform="translate(${x} ${y})"><path d="M 0 -8.5 L 9.5 8 L -9.5 8 Z" fill="#e0312b" stroke="#8e1712" stroke-width="1.6" stroke-linejoin="round"/>
+<rect x="-1.15" y="-3.6" width="2.3" height="6.6" rx="1" fill="#ffffff"/><circle cx="0" cy="5.4" r="1.25" fill="#ffffff"/></g>`
 }
 
 // شريط أبيض بإطار أسود متل تحذيرات الباكيت الحقيقية. بالرسمة المتحركة كل التحذيرات
@@ -146,7 +146,7 @@ function tip(end: number, cy: number, hh: number, isJoint: boolean): string {
   return `
 <circle cx="${end + 4}" cy="${cy}" r="${hh * 2}" fill="url(#glow)" filter="url(#soft)" opacity=".7"><animate attributeName="opacity" values=".45;.95;.45" dur="${pulse}" repeatCount="indefinite"/></circle>
 <path d="M ${end + 4} ${y0 + 1} L ${end + 18} ${y0 + 2} L ${end + 21} ${(y0 + h * 0.3).toFixed(1)} L ${end + 19} ${cy} L ${end + 22} ${(y0 + h * 0.75).toFixed(1)} L ${end + 17} ${y0 + h - 1} L ${end + 4} ${y0 + h - 1} Z" fill="url(#${isJoint ? 'jointAsh' : 'ash'})"/>
-<circle cx="${end + 10}" cy="${cy - hh / 3}" r="1" fill="#3d3833"/><circle cx="${end + 14}" cy="${cy + hh / 2.4}" r="1.1" fill="#3d3833"/>
+${isJoint ? '' : `<circle cx="${end + 10}" cy="${cy - hh / 3}" r="1" fill="#3d3833"/><circle cx="${end + 14}" cy="${cy + hh / 2.4}" r="1.1" fill="#3d3833"/>`}
 <rect x="${end - 2}" y="${y0}" width="7" height="${h}" fill="#ff5a14"><animate attributeName="fill" values="#ff5a14;#ffb347;#ff5a14" dur="${pulse}" repeatCount="indefinite"/></rect>
 <circle cx="${end + 6}" cy="${cy - hh / 2}" r="1.2" fill="#ffcf6b"><animate attributeName="opacity" values="0;1;0" dur="${pulse}" repeatCount="indefinite"/></circle>
 <circle cx="${end + 6}" cy="${cy + hh / 1.7}" r="1" fill="#ffcf6b"><animate attributeName="opacity" values="1;0;1" dur="${pulse}" repeatCount="indefinite"/></circle>`
@@ -169,7 +169,7 @@ function cigaretteBody(end: number, cy: number): string {
 <line x1="116" y1="${y0 + 5}" x2="${end.toFixed(1)}" y2="${y0 + 5}" stroke="#ffffff" stroke-width=".8" opacity=".9"/>`
 }
 
-// جوينت: كرتونة كرافت ملفوفة + ورق مخروطي بيوسع لعند الجمرة، والعشبة باينة من ورا.
+// جوينت: فلتر كرتون غير مبيّض مكتوب عليه RAW (طلب كريم) + ورق مخروطي بيوسع لعند الجمرة.
 function jointBody(x0: number, end: number, cy: number, hh0: number, hh: number): string {
   const cone = `M ${x0} ${cy - hh0} L ${end.toFixed(1)} ${(cy - hh).toFixed(1)} L ${end.toFixed(1)} ${(cy + hh).toFixed(1)} L ${x0} ${cy + hh0} Z`
   let spiral = ''
@@ -188,9 +188,9 @@ function jointBody(x0: number, end: number, cy: number, hh0: number, hh: number)
 <clipPath id="crutchClip"><rect x="28" y="${cy - hh0}" width="${x0 - 28}" height="${hh0 * 2}" rx="3"/></clipPath>
 <rect x="28" y="${cy - hh0}" width="${x0 - 28}" height="${hh0 * 2}" rx="3" fill="url(#crutch)"/>
 <g clip-path="url(#crutchClip)">${spiral}</g>
+<text x="${(28 + x0) / 2}" y="${cy + 3.6}" text-anchor="middle" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="900" letter-spacing="1.6" fill="#3a2512" stroke="#e2c79a" stroke-width="1.6" paint-order="stroke">RAW</text>
 <path d="${cone}" fill="url(#rollPaper)"/>
 <path d="${cone}" fill="url(#herbTint)"/>
-<path d="${cone}" fill="url(#herb)"/>
 <path d="${cone}" fill="url(#fiber)"/>
 ${folds}
 <line x1="${x0}" y1="${cy - hh0 + 2.5}" x2="${end.toFixed(1)}" y2="${(cy - hh + 3).toFixed(1)}" stroke="#f6e8c8" stroke-width=".9" opacity=".9"/>`
