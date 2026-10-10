@@ -73,6 +73,7 @@ claude plugin validate .
 بيعدّد كل إشي المود بيستعمله: `$.clock`, `$.command.register`, `$.env.get` (OS), `$.session.usage`, `$.state`, `$.store`, `$.ui.resolve`, `$.ui.toast`. ما في `$.http` ولا `$.process` ولا `$.fs`.
 
 - **Desktop app:** an animated SVG. On **Windows** it is a still image, because the animated version reloads on every change and blinks out for a moment there.
+- **Never scrolls:** the band sizes itself to the rows Claude gives it (Windows often gives fewer) — the drawing shrinks on desktop, the least important rows step aside in the terminal.
 - **Terminal:** a framed card: title and puff count, a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~` (or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`) with the ashtray `╰▁▂▃▂▁╯▬▬ ×2` at the end, the warning as a full reverse-video bar `⚠ WARNING: …`, the line, and the meters.
 - **Joint:** unbleached, RAW-style rolling paper (no specks) and a tip that says RAW.
 

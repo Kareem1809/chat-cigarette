@@ -46,6 +46,8 @@ const lang = atom({ plugin: 'chat-cigarette', key: 'lang' } as const, 'en' as La
 const HUMAN = new Set(['composer', 'bridge', 'sdk'])
 
 const METER_CELLS = 14
+// كم بكسل بنحسب للسطر بالديسكتوب لما نقرّر قديش الرسمة بتكبر (أقل شوي من الحقيقي = أمان).
+const ROW_PX = 16
 const RAMP = ['▃', '▄', '▅', '▆', '▇'] as const
 const HEAP = [' ', '▁', '▂', '▃', '▄', '▅', '▆'] as const
 
@@ -329,14 +331,12 @@ export const register: Register = on => {
     if (e.surface === 'desktop') {
       const { Box, Text, Svg } = $.ui.resolve(e)
       const noun = KINDS[kind].noun
-      const rows = [
-        <Text key="tag" bold color={isOut ? '#b9a6ff' : undefined}>
-          {line}
-        </Text>,
-      ]
-      for (const m of ms) {
+      // الشريط لازم يفوت كله بالمساحة اللي معه (maxRows) — غير هيك بيصير فيه سكرول
+      // (على ويندوز المساحة أصغر). العدّادين بسطر واحد إذا في عرض، والرسمة بتصغر لحالها.
+      const oneLine = e.props.bodyColumns >= 110
+      const meterRow = (m: Meter) => {
         const b = meterBar(m.pct)
-        rows.push(
+        return (
           <Box key={m.key} flexDirection="row" gap={1}>
             <Text>{m.icon}</Text>
             <Box flexDirection="row">
@@ -345,8 +345,24 @@ export const register: Register = on => {
             </Box>
             <Text bold color={m.color}>{b.label}</Text>
             <Text dimColor>{m.text}</Text>
-          </Box>,
+          </Box>
         )
+      }
+      const rows = [
+        <Text key="tag" bold color={isOut ? '#b9a6ff' : undefined} wrap="truncate">
+          {line}
+        </Text>,
+      ]
+      if (ms.length > 0) {
+        if (oneLine) {
+          rows.push(
+            <Box key="meters" flexDirection="row" gap={3}>
+              {ms.map(meterRow)}
+            </Box>,
+          )
+        } else {
+          for (const m of ms) rows.push(meterRow(m))
+        }
       }
       if (isOut) {
         rows.push(
@@ -356,8 +372,11 @@ export const register: Register = on => {
           </Box>,
         )
       }
+      const natural = isOut ? 200 : 142
+      const svgH = Math.round(Math.max(56, Math.min(natural, (e.props.maxRows - rows.length) * ROW_PX)))
+      const svgW = Math.round((600 * svgH) / natural)
       return (
-        <Box flexDirection="column" gap={1}>
+        <Box flexDirection="column">
           <Svg
             source={scene({ kind, ln, puffs: s.puffs, warnings: warns, butts: day.butts, isUnlit, stats: card, animated: !isWindows })}
             alt={
@@ -365,9 +384,11 @@ export const register: Register = on => {
                 ? `Chat ${noun} burned out — ${REST_LINE} — ${card}`
                 : `Chat ${noun}: ${s.puffs} of ${PUFFS} puffs smoked — ${warn}`
             }
+            width={svgW}
+            height={svgH}
             isInteractive={!isWindows}
           />
-          <Box flexDirection="column">{rows}</Box>
+          {rows}
         </Box>
       )
     }
@@ -470,9 +491,12 @@ export const register: Register = on => {
           </Box>,
         )
       }
+      // لازم يفوت كله بالمساحة (maxRows، والإطار سطرين): العنوان والسيجارة دايماً،
+      // وإذا ضاقت بنشيل من الآخر (المشاركة، العدّادات، الجملة، التحذير).
+      const fit = rows.slice(0, Math.max(2, e.props.maxRows - 2))
       return (
         <Box flexDirection="column" width={width} borderStyle="round" borderColor="#5d4f86" paddingX={1}>
-          {rows}
+          {fit}
         </Box>
       )
     }

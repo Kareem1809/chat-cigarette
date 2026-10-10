@@ -568,3 +568,27 @@ test('a joint picked with the old /smoke (before 0.4) is still remembered', asyn
   expect(await ui.find({ type: 'Text', text: 'CHAT JOINT' })).toBeDefined()
   await ui.unmount()
 })
+
+test('the band always fits its rows, so it never scrolls (Windows has fewer rows)', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  on('session.measure', ($, e) => ({ changed: e.changed }))
+  await $.session.measure({
+    context: { tokens: 46000, window: 200000, percent: 23 },
+    rateLimits: [{ kind: 'five_hour', percentUsed: 42 }],
+    changed: ['rateLimits', 'context'],
+  })
+  for (const maxRows of [6, 9, 30]) {
+    const props = { ...BAND.props, maxRows, scroll: { offset: 0, bodyRows: maxRows - 1 } }
+    const term = await $.ui.mount({ ...BAND, surface: 'terminal', props })
+    const box = (await term.drawn()) as unknown as { children: unknown[] }
+    expect(box.children.length + 2).toBeLessThanOrEqual(Math.max(4, maxRows))
+    await term.unmount()
+
+    const desk = await $.ui.mount({ ...BAND, surface: 'desktop', props })
+    const tree = (await desk.drawn()) as unknown as { children: { type: string; props: { height?: number } }[] }
+    const svg = tree.children.find(c => c.type === 'Svg')
+    const textRows = tree.children.length - 1
+    expect(svg?.props.height).toBeLessThanOrEqual(Math.max(56, (maxRows - textRows) * 16))
+    await desk.unmount()
+  }
+})
