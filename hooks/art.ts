@@ -79,6 +79,7 @@ function defs(night: number): string {
 <linearGradient id="night" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffe6a8"/><stop offset="1" stop-color="#c8b6ff"/></linearGradient>
 <linearGradient id="tray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4c86"/><stop offset="1" stop-color="#211a38"/></linearGradient>
 <radialGradient id="glow"><stop offset="0" stop-color="#ffd27a"/><stop offset=".35" stop-color="#ff7a1a" stop-opacity=".85"/><stop offset="1" stop-color="#ff3d00" stop-opacity="0"/></radialGradient>
+<linearGradient id="flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3b6cff"/><stop offset=".22" stop-color="#ffd84a"/><stop offset=".65" stop-color="#ff8a1a"/><stop offset="1" stop-color="#ff4a00" stop-opacity=".2"/></linearGradient>
 <radialGradient id="leafGlow"><stop offset="0" stop-color="#ff9a3c" stop-opacity=".45"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/></radialGradient>
 <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
 <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
@@ -255,6 +256,40 @@ function ashHeap(cx: number, base: number, maxW: number, maxH: number, ash: numb
   return `<path d="M ${(cx - w).toFixed(1)} ${base} C ${(cx - w * 0.55).toFixed(1)} ${(base - h * 1.35).toFixed(1)} ${(cx + w * 0.55).toFixed(1)} ${(base - h * 1.35).toFixed(1)} ${(cx + w).toFixed(1)} ${base} Z" fill="url(#ashHeap)"/>${specks}`
 }
 
+// عدّاد المكتة: كم عقب فيها اليوم — دايماً ظاهر (حتى صفر).
+function countBadge(x: number, y: number, n: number): string {
+  return `<g data-count="${n}"><rect x="${x - 17}" y="${y - 9}" width="34" height="17" rx="8.5" fill="#241b40" stroke="#8a7cc0" stroke-width="1"/>
+${buttShape('cigarette', x - 7, y - 0.5, -18, 0.45)}<text x="${x + 7}" y="${y + 3.8}" text-anchor="middle" font-family="${FONT}" font-size="10.5" font-weight="800" fill="#efe8ff">${n}</text></g>`
+}
+
+// قدّاحة + شعلة بتولّع الطرف (حركة بتصير مرة وحدة لما تنولّع سيجارة/جوينت جديد).
+function lighter(x: number, y: number): string {
+  return `<g opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.12;.75;1" begin=".8s" dur="1.1s" fill="freeze"/>
+<rect x="${x - 7}" y="${y + 9}" width="15" height="26" rx="3" fill="#d23a2e"/><rect x="${x - 7}" y="${y + 4}" width="15" height="6" rx="1.5" fill="#c9c9cf"/>
+<path d="M ${x} ${y + 4} c -5 -4 -4 -10 0 -16 c 4 6 5 12 0 16 z" fill="url(#flame)"><animateTransform attributeName="transform" type="scale" values="1 1;1 1.12;1 .95;1 1.08" dur=".25s" repeatCount="indefinite" additive="sum"/></path></g>`
+}
+
+// شرار ونفخة دخان لما العقب ينطفى بالمكتة.
+function stubPuff(x: number, y: number, at: number): string {
+  let sparks = ''
+  const dirs = [[-14, -9], [-6, -15], [4, -14], [13, -8], [16, 1]]
+  dirs.forEach(([dx, dy], i) => {
+    sparks += `<circle cx="${x}" cy="${y}" r="${1.4 - i * 0.12}" fill="#ffb347" opacity="0">
+<animate attributeName="opacity" values="0;1;0" begin="${at}s" dur=".55s" fill="freeze"/>
+<animateTransform attributeName="transform" type="translate" values="0 0; ${dx} ${dy}" begin="${at}s" dur=".55s" fill="freeze"/></circle>`
+  })
+  return `${sparks}<circle cx="${x}" cy="${y - 3}" r="3" fill="none" stroke="#ddd6f3" stroke-width="2.2" opacity="0" filter="url(#blur)">
+<animate attributeName="r" values="3;18" begin="${at}s" dur="1s" fill="freeze"/><animate attributeName="opacity" values="0;.75;0" begin="${at}s" dur="1s" fill="freeze"/></circle>`
+}
+
+// آخر عقب بينزل عالمكتة وبينطفى (مرة وحدة لما يطلع كرت النهاية).
+function stubIn(shape: string, x: number, y: number): string {
+  return `<g data-stub="1"><g opacity="0"><animate attributeName="opacity" values="0;1" dur=".2s" fill="freeze"/>
+<animateTransform attributeName="transform" type="translate" values="118 -30; 6 -5; 0 0" keyTimes="0;.78;1" dur="1.1s" fill="freeze"/>
+<g><animateTransform attributeName="transform" type="rotate" values="-55 ${x} ${y}; 10 ${x} ${y}; 0 ${x} ${y}" keyTimes="0;.82;1" dur="1.1s" fill="freeze"/>${shape}</g></g>
+${stubPuff(x + 16, y, 1.05)}</g>`
+}
+
 // المكتة (المنفضة) بآخر السيجارة: الرماد فيها بيزيد مع كل سحبة، وأعقاب اليوم بتضل فيها.
 function ashtray(butts: readonly Style[], ash: number): string {
   const cx = 532
@@ -271,9 +306,7 @@ ${ashHeap(cx - 2, cy + 1.5, 24, 10, ash)}`
   shown.forEach((b, i) => {
     out += buttShape(b, cx - 18 + i * 8.5, cy - 2 + (i % 2) * 2, -22 + i * 11, 0.82)
   })
-  if (n > 0) {
-    out += `<text x="${cx + 40}" y="${cy - 15}" text-anchor="middle" font-family="${FONT}" font-size="10" font-weight="700" fill="#c8b6ff">×${n}</text>`
-  }
+  out += countBadge(cx + 36, cy - 20, n)
   return out + '</g>'
 }
 
@@ -287,7 +320,7 @@ function fallingAsh(fromX: number, fromY: number): string {
 }
 
 // المنفضة الكبيرة بكرت المشاركة: أعقاب اليوم كلها مفروشة فيها.
-function bigTray(butts: readonly Style[]): string {
+function bigTray(butts: readonly Style[], animated: boolean): string {
   const n = butts.length
   const shown = butts.slice(-12)
   const m = shown.length
@@ -300,11 +333,10 @@ ${ashHeap(300, 122, 70, 15, 1)}`
     const x = 300 + (i - (m - 1) / 2) * spacing
     const y = 114 + (i % 2 ? 5 : 0)
     const rot = (i % 2 ? 14 : -12) + (((i * 37) % 9) - 4)
-    out += buttShape(b, x, y, rot, 1.35)
+    const shape = buttShape(b, x, y, rot, 1.35)
+    out += animated && i === m - 1 ? stubIn(shape, x, y) : shape
   })
-  if (n > m) {
-    out += `<text x="462" y="124" font-family="${FONT}" font-size="12" font-weight="700" fill="#c8b6ff">+${n - m}</text>`
-  }
+  out += countBadge(478, 108, n)
   return out + '</g>'
 }
 
@@ -377,10 +409,29 @@ function burning(s: Scene, f: number): string {
     }
   }
 
+  // أول نَفَس: سيجارة بتطلع من الباكيت، أو جوينت بينلفّ — وبعدين القدّاحة بتولّعه (مرة وحدة).
+  const intro = s.animated && s.puffs === 1 && !s.isUnlit
+  if (intro) {
+    stick = isJoint
+      ? `<g data-intro="roll" transform="translate(0 ${cy})"><g><animateTransform attributeName="transform" type="scale" values="1 0.06; 1 1.18; 1 1" keyTimes="0;.72;1" dur="1.1s" fill="freeze"/><g transform="translate(0 ${-cy})">${stick}</g></g></g>`
+      : `<g data-intro="light"><animateTransform attributeName="transform" type="translate" values="-150 0; 8 0; 0 0" keyTimes="0;.8;1" dur=".95s" fill="freeze"/>${stick}</g>`
+    lit = `<g opacity="0"><animate attributeName="opacity" values="0;1" begin="1.15s" dur=".35s" fill="freeze"/>${lit}</g>${lighter(end + 8, cy + hh + 2)}`
+  }
+  // الباكيت: بيضل لحد ما السيجارة تطلع منه، وبعدين بيختفي.
+  const pack =
+    intro && !isJoint
+      ? `<g><animate attributeName="opacity" values="1;1;0" keyTimes="0;.6;1" dur="1.5s" fill="freeze"/>
+<rect x="6" y="${cy - 30}" width="54" height="60" rx="4" fill="#f4f1ea" stroke="#bdb6a8" stroke-width="1"/>
+<rect x="6" y="${cy - 30}" width="54" height="17" rx="4" fill="#c8282a"/><rect x="6" y="${cy - 18}" width="54" height="5" fill="#c8282a"/>
+<path d="M 6 ${cy + 2} L 33 ${cy + 16} L 60 ${cy + 2}" fill="none" stroke="#c8282a" stroke-width="3"/>
+<text x="33" y="${cy - 2}" text-anchor="middle" font-family="${FONT}" font-size="8" font-weight="900" letter-spacing="1" fill="#c8282a">CHAT</text></g>`
+      : ''
+
   return `
 ${header(s.kind, s.puffs, s.ln)}
 <ellipse cx="${(28 + end) / 2}" cy="${cy + hh + 5}" rx="${(end - 28) / 2}" ry="4" fill="#000" opacity=".35" filter="url(#blur)"/>
 ${stick}
+${pack}
 ${lit}
 ${dots}
 ${ashtray(s.butts, f)}`
@@ -401,7 +452,7 @@ ${leaf(520, 132, 13, 3.1, 7)}
 <text x="494" y="22" font-family="${FONT}" font-size="8" font-weight="700" fill="#c8b6ff">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="1.2s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 6; -4 -6" dur="2.4s" begin="1.2s" repeatCount="indefinite"/></text>
 <text x="300" y="46" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="25" fill="url(#night)">${esc(REST_LINE.replace(/\s*🍁$/, ''))}</text>
 <text x="300" y="74" text-anchor="middle"${dir} font-family="${FONT}" font-size="11" font-weight="700" letter-spacing="${s.ln === 'en' ? 1.6 : 0}" fill="#c8b6ff">${esc(s.stats)}</text>
-${bigTray(s.butts)}
+${bigTray(s.butts, s.animated)}
 <g filter="url(#blur)" stroke="#ddd6f3" fill="none" stroke-linecap="round">${wisp(318, 104, 0, 5, 1.6, 1)}</g>
 <rect x="64" y="150" width="472" height="22" rx="11" fill="#ffffff" fill-opacity=".06" stroke="#ffffff" stroke-opacity=".16"/>
 <text x="300" y="165" text-anchor="middle" font-family="${MONO}" font-size="10.5" fill="#bdb2e0">${esc(INSTALL)}</text>

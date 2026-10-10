@@ -1,6 +1,6 @@
 {
   "name": "chat-cigarette",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "سيجارة 🚬 أو جوينت 🌿 بتحترق مع كل رسالة لكلود — تحذيرات باكيت، منفضة يومية، كرت مشاركة، ووضع آخر الليل",
   "types": "./types/index.d.ts",
   "author": {

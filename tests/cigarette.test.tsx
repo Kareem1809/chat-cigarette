@@ -513,3 +513,58 @@ test('no fresh one while Claude is still saying goodnight', async ($, on) => {
   expect(await ui.find({ type: 'Text', text: '20/20 puffs' })).toBeDefined()
   await ui.unmount()
 })
+
+test('the ashtray always shows how many butts are in it', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(svgSource(await ui.drawn())).toContain('data-count="0"')
+  await ui.unmount()
+})
+
+test('the first puff plays the lighting (cigarette) or rolling (joint) animation, once', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on)
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  await $.prompt.submit({ text: 'a', wait: false, origin: { kind: 'composer' } })
+  let ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(svgSource(await ui.drawn())).toContain('data-intro="light"')
+  await ui.unmount()
+  await $.prompt.submit({ text: 'b', wait: false, origin: { kind: 'composer' } })
+  ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(svgSource(await ui.drawn())).not.toContain('data-intro')
+  await ui.unmount()
+})
+
+test('a joint rolls on its first puff', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on)
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  await $.command.run({ command: 'smoke', args: 'joint', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
+  await $.prompt.submit({ text: 'a', wait: false, origin: { kind: 'composer' } })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(svgSource(await ui.drawn())).toContain('data-intro="roll"')
+  await ui.unmount()
+})
+
+test('when it burns out, the butt gets stubbed out in the ashtray', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  for (let i = 0; i < 20; i++) await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  const src = svgSource(await ui.drawn())
+  expect(src).toContain('data-stub="1"')
+  expect(src).toContain('data-count="1"')
+  await ui.unmount()
+})
+
+test('a joint picked with the old /smoke (before 0.4) is still remembered', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on, { style: 'joint' })
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('command.register', () => ({ value: undefined }) as never)
+  on('session.usage', () => ({ value: { startedAt: 0, context: { window: 200000 }, rateLimits: [] } }) as never)
+  await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: 'CHAT JOINT' })).toBeDefined()
+  await ui.unmount()
+})

@@ -153,14 +153,17 @@ export const register: Register = on => {
       () => false,
     )
     // الافتراضي سيجارة بالإنجليزي؛ اختيارك (/smoke · /smokear · /smokehe · /smokeen) بيضل محفوظ.
-    const [savedKind, savedLang, savedDay, usage, now] = await Promise.all([
+    // 'style' = المفتاح القديم (قبل 0.4) — اللي اختاره من وقتها بيضل محفوظ.
+    const [savedKind, legacyKind, savedLang, savedDay, usage, now] = await Promise.all([
       $.store.get('kind'),
+      $.store.get('style'),
       $.store.get('lang'),
       $.store.get('day'),
       $.session.usage().catch(() => null),
       $.clock.now(),
     ])
-    if (savedKind === 'joint' || savedKind === 'cigarette') await update($, style, () => savedKind)
+    const kind = savedKind ?? legacyKind
+    if (kind === 'joint' || kind === 'cigarette') await update($, style, () => kind)
     if (savedLang === 'ar' || savedLang === 'en' || savedLang === 'he') await update($, lang, () => savedLang)
 
     // منفضة اليوم من المخزن (+ اللي لسا ما انكتب من هالجلسة).
