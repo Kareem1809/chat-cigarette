@@ -370,7 +370,7 @@ export const register: Register = on => {
       const f = Math.min(1, s.puffs / PUFFS)
       const left = Math.round(paperCells * (1 - f))
       const isJoint = kind === 'joint'
-      const filter = isJoint ? '#b08b58' : '#d0843a'
+      const filter = isJoint ? '#b08b58' : '#f0bf82'
       const paper = isJoint
         ? Array.from({ length: left }, (_, i) => RAMP[Math.min(4, Math.floor((i / paperCells) * 5))]).join('')
         : '█'.repeat(left)
@@ -404,7 +404,7 @@ export const register: Register = on => {
         <Text key="ash" color="#9a948b">{ashCells(isOut ? 1 : f)}</Text>,
         <Text key="trayR" color="#8a7cc0">╯</Text>,
         ...day.butts.slice(-6).map((b, i) => (
-          <Text key={`b${i}`} color={b === 'joint' ? '#b08b58' : '#d0843a'}>▬</Text>
+          <Text key={`b${i}`} color={b === 'joint' ? '#b08b58' : '#f0bf82'}>▬</Text>
         )),
       ]
       if (day.butts.length > 0) tray.push(<Text key="count" color="#c8b6ff" bold>{` ×${day.butts.length}`}</Text>)
@@ -422,15 +422,17 @@ export const register: Register = on => {
       if (isOut) {
         rows.push(<Text key="stats" color="#c8b6ff" bold>{card}</Text>)
       } else {
-        // التحذير بنص الشريط، ومربّع أحمر فيه ⚠ من الجهتين.
-        const room = inner - 6
+        // التحذير بنص الشريط، والمثلث الأحمر لازق فيه من الجهتين.
         const body = ` ${warn} `
-        const padL = Math.max(0, Math.floor((room - body.length) / 2))
+        const padL = Math.max(0, Math.floor((inner - body.length - 6) / 2))
+        const padR = Math.max(0, inner - padL - body.length - 6)
         rows.push(
           <Box key="warn" flexDirection="row">
+            <Text inverse>{' '.repeat(padL)}</Text>
             <Text inverse bold color="#e0312b">{' ⚠ '}</Text>
-            <Text inverse bold wrap="truncate">{(' '.repeat(padL) + body).padEnd(room)}</Text>
+            <Text inverse bold wrap="truncate">{body}</Text>
             <Text inverse bold color="#e0312b">{' ⚠ '}</Text>
+            <Text inverse>{' '.repeat(padR)}</Text>
           </Box>,
         )
       }

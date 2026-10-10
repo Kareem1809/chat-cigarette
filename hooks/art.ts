@@ -68,7 +68,7 @@ function mix(a: string, b: string, t: number): string {
 function defs(night: number): string {
   return `<defs>
 <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${mix('#2a1d4e', '#120d26', night)}"/><stop offset="1" stop-color="${mix('#5b2f57', '#241a40', night)}"/></linearGradient>
-<linearGradient id="cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3b86d"/><stop offset=".5" stop-color="#d0843a"/><stop offset="1" stop-color="#94501d"/></linearGradient>
+<linearGradient id="cork" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fde2b6"/><stop offset=".5" stop-color="#f0bf82"/><stop offset="1" stop-color="#cf9152"/></linearGradient>
 <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f2ede4"/><stop offset="1" stop-color="#c9c0b0"/></linearGradient>
 <linearGradient id="rollPaper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efdcb6"/><stop offset=".45" stop-color="#d9bf8f"/><stop offset="1" stop-color="#a4855a"/></linearGradient>
 <linearGradient id="herbTint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d7a3a" stop-opacity=".04"/><stop offset=".6" stop-color="#5f6a2c" stop-opacity=".12"/><stop offset="1" stop-color="#4a4a22" stop-opacity=".22"/></linearGradient>
@@ -82,7 +82,7 @@ function defs(night: number): string {
 <radialGradient id="leafGlow"><stop offset="0" stop-color="#ff9a3c" stop-opacity=".45"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/></radialGradient>
 <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
 <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
-<pattern id="dots" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#6b3510" opacity=".45"/><circle cx="5.5" cy="5" r=".7" fill="#6b3510" opacity=".35"/></pattern>
+<pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="1.4" cy="1.5" r=".75" fill="#2a1506" opacity=".6"/><circle cx="4.5" cy="3.9" r=".65" fill="#2a1506" opacity=".55"/><circle cx="2.6" cy="5" r=".45" fill="#3d2410" opacity=".5"/><circle cx="5.3" cy=".9" r=".4" fill="#3d2410" opacity=".45"/></pattern>
 <pattern id="herb" width="9" height="7" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="2.5" r="1" fill="#55602a" opacity=".42"/><circle cx="6" cy="5.2" r=".85" fill="#3c4a1d" opacity=".42"/><circle cx="7" cy="1.3" r=".55" fill="#7d8a3e" opacity=".38"/><circle cx="3.6" cy="5.9" r=".5" fill="#5e4a27" opacity=".45"/></pattern>
 <pattern id="fiber" width="23" height="5" patternUnits="userSpaceOnUse"><line x1="0" y1="1" x2="14" y2="1.4" stroke="#f3e2bf" stroke-width=".5" opacity=".7"/><line x1="8" y1="3.6" x2="21" y2="3.2" stroke="#a88a5c" stroke-width=".45" opacity=".55"/></pattern>
 <linearGradient id="ashHeap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfc9c0"/><stop offset=".6" stop-color="#8e877d"/><stop offset="1" stop-color="#544e47"/></linearGradient>
@@ -98,18 +98,27 @@ function frame(h: number, night: number): string {
 
 // ───────────── تحذير الباكيت ─────────────
 
-// مثلث أحمر فيه علامة تعجب بيضا (⚠) — على طرفي الشريط (كريم: أحمر مش أصفر).
-function warnIcon(x: number, y: number): string {
-  return `<g transform="translate(${x} ${y})"><path d="M 0 -8.5 L 9.5 8 L -9.5 8 Z" fill="#e0312b" stroke="#8e1712" stroke-width="1.6" stroke-linejoin="round"/>
-<rect x="-1.15" y="-3.6" width="2.3" height="6.6" rx="1" fill="#ffffff"/><circle cx="0" cy="5.4" r="1.25" fill="#ffffff"/></g>`
+// مثلث أحمر مليان فيه علامة تعجب بيضا، لازق بالجملة من الجهتين — جزء من نفس السطر،
+// فبيمشي مع الجملة مهما كان طولها. ▲ بخط Arial (عرضه 1em بالماك وويندوز) و«!» فوقه بالنص.
+// السطر كله من اليسار لليمين؛ الجملة العربي/العبري بقطعة لحالها من اليمين لليسار جوّاته.
+function sign(): string {
+  const tri = 13.9
+  const bang = 3
+  const back = -(tri / 2 + bang / 2)
+  const fwd = tri / 2 - bang / 2
+  return (
+    `<tspan fill="#e0312b" font-family="Arial, 'Apple Symbols', sans-serif" font-size="14" font-weight="400">\u25B2</tspan>` +
+    `<tspan dx="${back.toFixed(2)}" dy="-1.3" fill="#ffffff" font-family="Arial, sans-serif" font-size="9" font-weight="900">!</tspan>` +
+    `<tspan dx="${fwd.toFixed(2)}" dy="1.3"> </tspan>`
+  )
 }
 
 // شريط أبيض بإطار أسود متل تحذيرات الباكيت الحقيقية. بالرسمة المتحركة كل التحذيرات
 // جوّاته وبيتبدّلوا لحالهم كل 5 ثواني (بلا إعادة تحميل)؛ بالصورة الثابتة بيبيّن الأول بس.
 function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): string {
-  // الجملة بالنص (كريم)، ومثلث أحمر من الجهتين.
+  // الجملة بالنص، والمثلث الأحمر لازق فيها من الجهتين (كريم).
   const rtl = ln !== 'en'
-  const attrs = `x="300" y="25.6" text-anchor="middle"${rtl ? ' direction="rtl"' : ''} font-family="'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#0b0b0b"`
+  const attrs = `x="300" y="25.6" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#0b0b0b"`
   const list = animated ? texts : texts.slice(0, 1)
   const n = list.length
   const each = 5
@@ -117,7 +126,9 @@ function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): st
   const e = (0.35 / T).toFixed(4)
   const lines = list
     .map((t, i) => {
-      if (n === 1) return `<text ${attrs}>${esc(t)}</text>`
+      const words = rtl ? `<tspan direction="rtl" unicode-bidi="embed">${esc(t)}</tspan>` : esc(t)
+      const body = `${sign()}${words} ${sign()}`
+      if (n === 1) return `<text ${attrs}>${body}</text>`
       const a = (i / n).toFixed(4)
       const b = ((i + 1) / n).toFixed(4)
       const ae = (i / n + Number(e)).toFixed(4)
@@ -128,12 +139,10 @@ function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): st
           : i === n - 1
             ? `values="0;0;1;1;0" keyTimes="0;${a};${ae};${be};1"`
             : `values="0;0;1;1;0;0" keyTimes="0;${a};${ae};${be};${b};1"`
-      return `<text ${attrs} opacity="${i === 0 ? 1 : 0}">${esc(t)}<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" ${anim}/></text>`
+      return `<text ${attrs} opacity="${i === 0 ? 1 : 0}">${body}<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" ${anim}/></text>`
     })
     .join('\n')
   return `<rect x="16" y="9" width="568" height="25" rx="2" fill="#f6f3ec" stroke="#0b0b0b" stroke-width="2.5"/>
-${warnIcon(30, 21.5)}
-${warnIcon(570, 21.5)}
 ${lines}`
 }
 
@@ -160,11 +169,16 @@ function unlitTip(end: number, cy: number, hh: number, isJoint: boolean): string
 <circle cx="${end + 1}" cy="${cy - hh / 3}" r=".9" fill="#3a2a14"/><circle cx="${end + 1.5}" cy="${cy + hh / 3}" r=".8" fill="#3a2a14"/>`
 }
 
+// فلتر السيجارة: فلين فاتح بنقاط سودا، لمعة فوق، ظل تحت، فتحة الفلتر مبيّنة، وخطّين دهبي.
 function cigaretteBody(end: number, cy: number): string {
   const y0 = cy - 12
   return `
 <rect x="28" y="${y0}" width="84" height="24" rx="5" fill="url(#cork)"/>
 <rect x="28" y="${y0}" width="84" height="24" rx="5" fill="url(#dots)"/>
+<rect x="31" y="${y0 + 2.5}" width="78" height="3.2" rx="1.6" fill="#ffffff" opacity=".35"/>
+<rect x="28" y="${y0 + 17}" width="84" height="7" rx="3.5" fill="#8a5420" opacity=".16"/>
+<ellipse cx="29.6" cy="${cy}" rx="2.6" ry="11.3" fill="#f8ead0" stroke="#d6a466" stroke-width=".8"/>
+<rect x="108.6" y="${y0}" width="1.7" height="24" fill="url(#gold)"/>
 <rect x="112" y="${y0}" width="4" height="24" fill="url(#gold)"/>
 <rect x="116" y="${y0}" width="${Math.max(0, end - 116).toFixed(1)}" height="24" fill="url(#paper)"/>
 <line x1="116" y1="${y0 + 5}" x2="${end.toFixed(1)}" y2="${y0 + 5}" stroke="#ffffff" stroke-width=".8" opacity=".9"/>`
