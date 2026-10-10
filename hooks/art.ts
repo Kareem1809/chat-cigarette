@@ -98,7 +98,7 @@ function frame(h: number, night: number): string {
 
 // ───────────── تحذير الباكيت ─────────────
 
-// مثلث أحمر مليان فيه علامة تعجب بيضا، لازق بالجملة من الجهتين — جزء من نفس السطر،
+// مثلث أحمر مليان فيه علامة تعجب بيضا — واحد بس، لازق بكلمة التحذير (كريم) — جزء من نفس السطر،
 // فبيمشي مع الجملة مهما كان طولها. ▲ بخط Arial (عرضه 1em بالماك وويندوز) و«!» فوقه بالنص.
 // السطر كله من اليسار لليمين؛ الجملة العربي/العبري بقطعة لحالها من اليمين لليسار جوّاته.
 function sign(): string {
@@ -116,7 +116,7 @@ function sign(): string {
 // شريط أبيض بإطار أسود متل تحذيرات الباكيت الحقيقية. بالرسمة المتحركة كل التحذيرات
 // جوّاته وبيتبدّلوا لحالهم كل 5 ثواني (بلا إعادة تحميل)؛ بالصورة الثابتة بيبيّن الأول بس.
 function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): string {
-  // الجملة بالنص، والمثلث الأحمر لازق فيها من الجهتين (كريم).
+  // الجملة بالنص، ومثلث أحمر واحد لازق بكلمة التحذير (كريم).
   const rtl = ln !== 'en'
   const attrs = `x="300" y="25.6" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#0b0b0b"`
   const list = animated ? texts : texts.slice(0, 1)
@@ -127,7 +127,8 @@ function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): st
   const lines = list
     .map((t, i) => {
       const words = rtl ? `<tspan direction="rtl" unicode-bidi="embed">${esc(t)}</tspan>` : esc(t)
-      const body = `${sign()}${words} ${sign()}`
+      // إنجليزي: المثلث قبل WARNING (يسار) · عربي/عبري: بعد «تحذير»/«אזהרה» (يمين).
+      const body = rtl ? `${words} ${sign()}` : `${sign()}${words}`
       if (n === 1) return `<text ${attrs}>${body}</text>`
       const a = (i / n).toFixed(4)
       const b = ((i + 1) / n).toFixed(4)

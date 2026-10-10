@@ -422,16 +422,16 @@ export const register: Register = on => {
       if (isOut) {
         rows.push(<Text key="stats" color="#c8b6ff" bold>{card}</Text>)
       } else {
-        // التحذير بنص الشريط، والمثلث الأحمر لازق فيه من الجهتين.
+        // التحذير بنص الشريط، ومثلث أحمر واحد لازق بكلمة التحذير (يسار بالإنجليزي، يمين بالعربي/العبري).
         const body = ` ${warn} `
-        const padL = Math.max(0, Math.floor((inner - body.length - 6) / 2))
-        const padR = Math.max(0, inner - padL - body.length - 6)
+        const padL = Math.max(0, Math.floor((inner - body.length - 3) / 2))
+        const padR = Math.max(0, inner - padL - body.length - 3)
+        const sign = <Text key="sign" inverse bold color="#e0312b">{' ⚠ '}</Text>
+        const words = <Text key="words" inverse bold wrap="truncate">{body}</Text>
         rows.push(
           <Box key="warn" flexDirection="row">
             <Text inverse>{' '.repeat(padL)}</Text>
-            <Text inverse bold color="#e0312b">{' ⚠ '}</Text>
-            <Text inverse bold wrap="truncate">{body}</Text>
-            <Text inverse bold color="#e0312b">{' ⚠ '}</Text>
+            {ln === 'en' ? [sign, words] : [words, sign]}
             <Text inverse>{' '.repeat(padR)}</Text>
           </Box>,
         )
