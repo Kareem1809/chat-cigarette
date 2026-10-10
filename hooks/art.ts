@@ -78,6 +78,9 @@ function defs(night: number): string {
 <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b0"/><stop offset=".5" stop-color="#d9b04f"/><stop offset="1" stop-color="#a77d22"/></linearGradient>
 <linearGradient id="night" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffe6a8"/><stop offset="1" stop-color="#c8b6ff"/></linearGradient>
 <linearGradient id="tray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4c86"/><stop offset="1" stop-color="#211a38"/></linearGradient>
+<linearGradient id="glassTop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6eeff" stop-opacity=".62"/><stop offset=".55" stop-color="#9fb0d8" stop-opacity=".5"/><stop offset="1" stop-color="#6c7aa6" stop-opacity=".62"/></linearGradient>
+<linearGradient id="glassSide" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93a5d2" stop-opacity=".75"/><stop offset="1" stop-color="#3b4470" stop-opacity=".9"/></linearGradient>
+<radialGradient id="bowl" cx=".5" cy=".62" r=".62"><stop offset="0" stop-color="#2b2448"/><stop offset=".8" stop-color="#3b3462"/><stop offset="1" stop-color="#58518a"/></radialGradient>
 <radialGradient id="glow"><stop offset="0" stop-color="#ffd27a"/><stop offset=".35" stop-color="#ff7a1a" stop-opacity=".85"/><stop offset="1" stop-color="#ff3d00" stop-opacity="0"/></radialGradient>
 <linearGradient id="flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3b6cff"/><stop offset=".22" stop-color="#ffd84a"/><stop offset=".65" stop-color="#ff8a1a"/><stop offset="1" stop-color="#ff4a00" stop-opacity=".2"/></linearGradient>
 <radialGradient id="leafGlow"><stop offset="0" stop-color="#ff9a3c" stop-opacity=".45"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/></radialGradient>
@@ -290,23 +293,42 @@ function stubIn(shape: string, x: number, y: number): string {
 ${stubPuff(x + 16, y, 1.05)}</g>`
 }
 
+// مكتة زجاج حقيقية: حيطة بسماكة، جوف غامق، تلات مطارح للسيجارة عالحافة، ولمعة زجاج.
+// «under» قبل الرماد والأعقاب، «over» بعدهم (الحافة القدّامية بتغطّي شوي منهم = جوّا المكتة).
+function ashtrayGlass(cx: number, cy: number, R: number, r: number, h: number): { under: string; over: string; bowlY: number; bowlRy: number } {
+  const Ri = R * 0.8
+  const ri = r * 0.68
+  const iy = cy + r * 0.12
+  const rest = (x: number, y: number, w: number) =>
+    `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${w}" ry="${(w * 0.48).toFixed(1)}" fill="#231d3d"/>` +
+    `<path d="M ${(x - w).toFixed(1)} ${y.toFixed(1)} A ${w} ${(w * 0.48).toFixed(1)} 0 0 0 ${(x + w).toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="#dfe7ff" stroke-opacity=".55" stroke-width=".9"/>`
+  const under = `
+<ellipse cx="${cx}" cy="${(cy + h + 3).toFixed(1)}" rx="${R + 4}" ry="${(r * 0.95).toFixed(1)}" fill="#000" opacity=".38" filter="url(#blur)"/>
+<path d="M ${cx - R} ${cy} L ${cx - R} ${cy + h} A ${R} ${r} 0 0 0 ${cx + R} ${cy + h} L ${cx + R} ${cy} Z" fill="url(#glassSide)"/>
+<ellipse cx="${cx}" cy="${cy}" rx="${R}" ry="${r}" fill="url(#glassTop)" stroke="#eef3ff" stroke-opacity=".75" stroke-width="1"/>
+<ellipse cx="${cx}" cy="${iy.toFixed(1)}" rx="${Ri.toFixed(1)}" ry="${ri.toFixed(1)}" fill="url(#bowl)"/>
+<path d="M ${(cx - Ri).toFixed(1)} ${iy.toFixed(1)} A ${Ri.toFixed(1)} ${ri.toFixed(1)} 0 0 1 ${(cx + Ri).toFixed(1)} ${iy.toFixed(1)}" fill="none" stroke="#c3cff0" stroke-opacity=".4" stroke-width="1.4"/>
+${rest(cx - R * 0.9, cy, R * 0.11)}${rest(cx + R * 0.9, cy, R * 0.11)}${rest(cx, cy - r * 0.86, R * 0.09)}`
+  const over = `
+<path d="M ${cx - R} ${cy} A ${R} ${r} 0 0 0 ${cx + R} ${cy} L ${(cx + Ri).toFixed(1)} ${iy.toFixed(1)} A ${Ri.toFixed(1)} ${ri.toFixed(1)} 0 0 1 ${(cx - Ri).toFixed(1)} ${iy.toFixed(1)} Z" fill="url(#glassTop)" opacity=".92"/>
+<path d="M ${(cx - R * 0.72).toFixed(1)} ${(cy + r * 0.7).toFixed(1)} A ${R} ${r} 0 0 0 ${(cx - R * 0.08).toFixed(1)} ${(cy + r * 0.99).toFixed(1)}" fill="none" stroke="#ffffff" stroke-opacity=".8" stroke-width="1.6" stroke-linecap="round"/>
+<line x1="${(cx + R * 0.86).toFixed(1)}" y1="${(cy + r * 0.45).toFixed(1)}" x2="${(cx + R * 0.86).toFixed(1)}" y2="${(cy + r * 0.45 + h).toFixed(1)}" stroke="#ffffff" stroke-opacity=".35" stroke-width="1.4" stroke-linecap="round"/>`
+  return { under, over, bowlY: iy, bowlRy: ri }
+}
+
 // المكتة (المنفضة) بآخر السيجارة: الرماد فيها بيزيد مع كل سحبة، وأعقاب اليوم بتضل فيها.
 function ashtray(butts: readonly Style[], ash: number): string {
   const cx = 532
-  const cy = 82
+  const cy = 80
   const n = butts.length
   const shown = butts.slice(-5)
-  let out = `<g data-butts="${n}" data-ash="${ash.toFixed(2)}">
-<ellipse cx="${cx}" cy="${cy + 3}" rx="48" ry="11" fill="#000" opacity=".3" filter="url(#blur)"/>
-<ellipse cx="${cx}" cy="${cy}" rx="46" ry="12" fill="url(#tray)" stroke="#8a7cc0" stroke-width="1.2"/>
-<ellipse cx="${cx}" cy="${cy - 1.5}" rx="37" ry="7.5" fill="#1a1430"/>
-<rect x="${cx - 47}" y="${cy - 3.2}" width="9" height="4" rx="2" fill="#1a1430"/>
-<rect x="${cx + 38}" y="${cy - 3.2}" width="9" height="4" rx="2" fill="#1a1430"/>
-${ashHeap(cx - 2, cy + 1.5, 24, 10, ash)}`
+  const g = ashtrayGlass(cx, cy, 44, 13, 7)
+  let out = `<g data-butts="${n}" data-ash="${ash.toFixed(2)}">${g.under}
+${ashHeap(cx - 2, g.bowlY + 4, 22, 9, ash)}`
   shown.forEach((b, i) => {
-    out += buttShape(b, cx - 18 + i * 8.5, cy - 2 + (i % 2) * 2, -22 + i * 11, 0.82)
+    out += buttShape(b, cx - 18 + i * 8.5, g.bowlY + 1 + (i % 2) * 2, -22 + i * 11, 0.82)
   })
-  out += countBadge(cx + 36, cy - 20, n)
+  out += g.over + countBadge(cx + 38, cy - 22, n)
   return out + '</g>'
 }
 
@@ -325,18 +347,17 @@ function bigTray(butts: readonly Style[], animated: boolean): string {
   const shown = butts.slice(-12)
   const m = shown.length
   const spacing = Math.min(30, 230 / Math.max(1, m))
-  let out = `<g data-butts="${n}">
-<ellipse cx="300" cy="120" rx="150" ry="17" fill="url(#tray)" stroke="#7d6fb4" stroke-width="1.2"/>
-<ellipse cx="300" cy="118" rx="124" ry="10" fill="#1a1430"/>
-${ashHeap(300, 122, 70, 15, 1)}`
+  const g = ashtrayGlass(300, 118, 122, 22, 11)
+  let out = `<g data-butts="${n}">${g.under}
+${ashHeap(300, g.bowlY + 8, 62, 13, 1)}`
   shown.forEach((b, i) => {
     const x = 300 + (i - (m - 1) / 2) * spacing
-    const y = 114 + (i % 2 ? 5 : 0)
+    const y = g.bowlY + 1 + (i % 2 ? 5 : 0)
     const rot = (i % 2 ? 14 : -12) + (((i * 37) % 9) - 4)
     const shape = buttShape(b, x, y, rot, 1.35)
     out += animated && i === m - 1 ? stubIn(shape, x, y) : shape
   })
-  out += countBadge(478, 108, n)
+  out += g.over + countBadge(458, 100, n)
   return out + '</g>'
 }
 
@@ -439,7 +460,7 @@ ${ashtray(s.butts, f)}`
 
 // كرت المشاركة: «روح ارتاح»، أرقام اليوم، المنفضة بكل أعقاب اليوم، وسطر التركيب.
 function burnedOut(s: Scene): string {
-  const h = 184
+  const h = 200
   const dir = s.ln === 'en' ? '' : ' direction="rtl"'
   return (
     frame(h, 1) +
@@ -447,15 +468,15 @@ function burnedOut(s: Scene): string {
 <circle cx="548" cy="40" r="32" fill="url(#leafGlow)"/>
 ${leaf(548, 40, 30, 0, 5)}
 ${leaf(66, 34, 16, 1.6, 6.5)}
-${leaf(520, 132, 13, 3.1, 7)}
+${leaf(536, 146, 13, 3.1, 7)}
 <text x="508" y="30" font-family="${FONT}" font-size="11" font-weight="700" fill="#c8b6ff">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 6; -4 -6" dur="2.4s" repeatCount="indefinite"/></text>
 <text x="494" y="22" font-family="${FONT}" font-size="8" font-weight="700" fill="#c8b6ff">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="1.2s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 6; -4 -6" dur="2.4s" begin="1.2s" repeatCount="indefinite"/></text>
 <text x="300" y="46" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="25" fill="url(#night)">${esc(REST_LINE.replace(/\s*🍁$/, ''))}</text>
 <text x="300" y="74" text-anchor="middle"${dir} font-family="${FONT}" font-size="11" font-weight="700" letter-spacing="${s.ln === 'en' ? 1.6 : 0}" fill="#c8b6ff">${esc(s.stats)}</text>
 ${bigTray(s.butts, s.animated)}
-<g filter="url(#blur)" stroke="#ddd6f3" fill="none" stroke-linecap="round">${wisp(318, 104, 0, 5, 1.6, 1)}</g>
-<rect x="64" y="150" width="472" height="22" rx="11" fill="#ffffff" fill-opacity=".06" stroke="#ffffff" stroke-opacity=".16"/>
-<text x="300" y="165" text-anchor="middle" font-family="${MONO}" font-size="10.5" fill="#bdb2e0">${esc(INSTALL)}</text>
+<g filter="url(#blur)" stroke="#ddd6f3" fill="none" stroke-linecap="round">${wisp(318, 108, 0, 5, 1.6, 1)}</g>
+<rect x="64" y="166" width="472" height="22" rx="11" fill="#ffffff" fill-opacity=".06" stroke="#ffffff" stroke-opacity=".16"/>
+<text x="300" y="181" text-anchor="middle" font-family="${MONO}" font-size="10.5" fill="#bdb2e0">${esc(INSTALL)}</text>
 </svg>`
   )
 }
