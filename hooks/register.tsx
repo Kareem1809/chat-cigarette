@@ -22,6 +22,7 @@ import {
   SHARE,
   contextDetail,
   dayKey,
+  freshLine,
   lastPuff,
   nightPhase,
   outOfSmokes,
@@ -212,23 +213,30 @@ export const register: Register = on => {
   // كل رسالة منك = نَفَس (تحديث واحد للحالة). الرسالة نفسها بتكمّل فوراً.
   on('prompt.submit', async ($, e, next) => {
     if (!HUMAN.has(e.origin.kind)) return next(e)
-    const [s, kind, now] = await Promise.all([read($, smoke), read($, style), $.clock.now()])
-    if (s.puffs >= PUFFS) return next(e)
+    const [s, kind, now, ln] = await Promise.all([read($, smoke), read($, style), $.clock.now(), read($, lang)])
+    const isDawn = nightPhase(now) === 'dawn'
+    // خلصت وكلود قال «روح ارتاح»؟ الرسالة الجاية بتولّع وحدة جديدة من الباكيت (أو بتلفّ جوينت).
+    // لسا عم يقلك «ارتاح» (الدور ما خلص)، أو 4 الصبح — ما في جديدة.
+    const isRelight = s.puffs >= PUFFS
+    if (isRelight && (!s.isRested || isDawn)) return next(e)
     // 4 الصبح: سيجارة جديدة ما بتولّع (بالرسمة بس).
-    if (s.puffs === 0 && nightPhase(now) === 'dawn') return next(e)
+    if (s.puffs === 0 && isDawn) return next(e)
 
-    const puffs = s.puffs + 1
+    const puffs = isRelight ? 1 : s.puffs + 1
     const isLast = puffs >= PUFFS
     await update($, smoke, v => {
       const day = dayView(v, now)
       const u = v.unsynced ?? { puffs: 0, butts: [] }
+      const from = v.puffs >= PUFFS ? 0 : v.puffs
       return {
         ...v,
-        puffs: Math.min(PUFFS, v.puffs + 1),
+        puffs: Math.min(PUFFS, from + 1),
+        isRested: v.puffs >= PUFFS ? false : v.isRested,
         day: { key: day.key, puffs: day.puffs + 1, butts: isLast ? [...day.butts, kind] : day.butts },
         unsynced: { puffs: u.puffs + 1, butts: isLast ? [...u.butts, kind] : u.butts },
       }
     })
+    if (isRelight) $.ui.toast(freshLine(kind, ln, dayView(s, now).butts.length + 1), { timeoutMs: 6000 })
 
     if (isLast) return next({ ...e, context: [...(e.context ?? []), lastPuff(kind)] })
     if (kind === 'joint' && puffs >= CHILL_FROM) return next({ ...e, context: [...(e.context ?? []), JOINT_CHILL] })
@@ -308,7 +316,7 @@ export const register: Register = on => {
     const isUnlit = s.puffs === 0 && nightPhase(now) === 'dawn'
     // كل سيجارة إلها رقم (من اليوم وكم عقب قبلها) — بتبلّش جملها وتحذيراتها من مكان جديد.
     const seed = seedOf(day.key, isOut ? Math.max(0, day.butts.length - 1) : day.butts.length)
-    const line = tagline(kind, ln, s.puffs, now, seed)
+    const line = tagline(kind, ln, s.puffs, now, seed, isOut ? 0 : day.butts.length)
     const warns = warnings(kind, ln, s.puffs, seed)
     const warn = warns[0] ?? ''
     const limitPct = lim !== null && !lim.isFresh ? Math.round(Math.min(100, lim.percent)) : null

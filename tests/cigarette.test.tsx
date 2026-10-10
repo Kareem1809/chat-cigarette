@@ -464,3 +464,52 @@ test('the joint tip says RAW, in the drawing and in the terminal', async ($, on)
   expect(await term.find({ type: 'Text', text: 'RAW' })).toBeDefined()
   await term.unmount()
 })
+
+test('after the rest, the next message lights a fresh one from the pack; the butt stays', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on)
+  const toasts: string[] = []
+  on('ui.toast', ($, e) => {
+    toasts.push(e.text)
+    return { value: undefined } as never
+  })
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  on('turn.complete', ($, e) => ({ ...e }) as never)
+  for (let i = 0; i < 20; i++) {
+    await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+    await $.turn.complete(complete as never)
+  }
+  await $.prompt.submit({ text: 'one more', wait: false, origin: { kind: 'composer' } })
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: '1/20 puffs' })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: '📦 Fresh one from the pack — #2 today' })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: '×1' })).toBeDefined()
+  await ui.unmount()
+  expect(toasts).toContain('📦 Fresh one from the pack — #2 today')
+})
+
+test('a joint gets rolled fresh, not pulled from a pack', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on)
+  on('ui.toast', () => ({ value: undefined }) as never)
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  on('turn.complete', ($, e) => ({ ...e }) as never)
+  await $.command.run({ command: 'smoke', args: 'joint', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
+  for (let i = 0; i < 20; i++) {
+    await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+    await $.turn.complete(complete as never)
+  }
+  await $.prompt.submit({ text: 'again', wait: false, origin: { kind: 'composer' } })
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: '🌿 Rolled a fresh one — #2 today' })).toBeDefined()
+  await ui.unmount()
+})
+
+test('no fresh one while Claude is still saying goodnight', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  for (let i = 0; i < 21; i++) await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: '20/20 puffs' })).toBeDefined()
+  await ui.unmount()
+})

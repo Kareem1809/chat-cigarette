@@ -309,11 +309,31 @@ export function seedOf(dayKeyText: string, butts: number): number {
   return h + butts * 7
 }
 
-export function tagline(kind: Style, ln: Lang, puffs: number, now: number, seed = 0): string {
+// بعد ما تخلص، الرسالة الجاية بتولّع وحدة جديدة من الباكيت (أو بتلفّ جوينت جديد) — مع رقمها اليوم.
+const FRESH: Record<Style, Record<Lang, string>> = {
+  cigarette: {
+    en: '📦 Fresh one from the pack — #{n} today',
+    ar: '📦 سيجارة جديدة من الباكيت — رقم {n} اليوم',
+    he: '📦 סיגריה חדשה מהחפיסה — מספר {n} היום',
+  },
+  joint: {
+    en: '🌿 Rolled a fresh one — #{n} today',
+    ar: '🌿 لفّينا جوينت جديد — رقم {n} اليوم',
+    he: '🌿 גלגלנו ג׳וינט חדש — מספר {n} היום',
+  },
+}
+
+export function freshLine(kind: Style, ln: Lang, n: number): string {
+  return FRESH[kind][ln].replace('{n}', String(n))
+}
+
+// earlier = كم سيجارة خلصت اليوم قبل هاي.
+export function tagline(kind: Style, ln: Lang, puffs: number, now: number, seed = 0, earlier = 0): string {
   if (puffs >= PUFFS) return KINDS[kind].out[ln]
   const phase = nightPhase(now)
   const time = clockText(now, ln)
   if (phase === 'dawn' && puffs === 0) return DAWN[ln].replace('{time}', time)
+  if (puffs === 1 && earlier > 0) return freshLine(kind, ln, earlier + 1)
   if (phase !== 'day') return (NIGHT[ln][puffs % NIGHT[ln].length] ?? '').replace('{time}', time)
   if (puffs === 0) return KINDS[kind].lit[ln]
   const f = puffs / PUFFS
