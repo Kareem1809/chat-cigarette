@@ -229,6 +229,185 @@ const LINES: Record<Lang, Lines> = {
   },
 }
 
+
+// دفعة تانية: 50 جملة كمان بكل لغة (المجموع 100) — عشان ما تشوف نفس الجملة مليون مرة (كريم).
+const MORE_LINES: Record<Lang, Lines> = {
+  en: {
+    early: [
+      '🍪 A snack break counts too',
+      '🌿 Inhale ideas, exhale bugs',
+      '🧩 One problem at a time',
+      '📻 Music in the back, focus in the front',
+      '🖊️ Write it down before it slips away',
+      '🫶 Be nice to tomorrow-you',
+      '🌅 Early puffs, clear head',
+      '🧭 Know where you’re going before you push',
+      '🧁 Small wins taste better',
+      '🪴 Let the code grow slowly',
+      '🎈 Keep it light, keep it working',
+      '🧘 Calm commits only',
+      '📚 Read the error message. All of it.',
+      '🔍 Zoom out for a second',
+      '🗂️ Tidy tabs, tidy mind',
+      '☁️ No rush, the cloud will wait',
+      '🐣 Fresh start — break nothing',
+    ],
+    mid: [
+      '🚰 Refill your water bottle',
+      '🦶 Wiggle your toes. Seriously.',
+      '🌳 There are trees outside. Allegedly.',
+      '🧃 Juice break? Juice break.',
+      '🤸 Stand up, stretch, sit back down smarter',
+      '🫁 Three slow breaths. Go.',
+      '🪟 Open a window, let the bugs out',
+      '🐈 Even cats take breaks between naps',
+      '💡 Walk away — the fix meets you in the hallway',
+      '🧊 Cool down before git push --force',
+      '🕺 Dance for ten seconds. Nobody’s watching.',
+      '🍎 Eat something that isn’t coffee',
+      '🎮 Not now. Later. Maybe.',
+      '📞 Call your mom',
+      '🧹 Close the tabs you’ll never read',
+      '⌚ Your back filed a complaint',
+      '🛁 Shower thoughts fix bugs for free',
+    ],
+    late: [
+      '🏠 Home time is a feature, not a bug',
+      '🔕 Do Not Disturb: you, soon',
+      '🫡 Good work today. Really.',
+      '🧾 Write tomorrow’s first task now',
+      '🌆 The day is almost out of puffs',
+      '🧦 Socks off, laptop closed',
+      '🍲 Dinner beats any deploy',
+      '🛌 Bed > bugs',
+      '🔋 Recharge yourself, not just the laptop',
+      '🥱 That yawn was a pull request from your body',
+      '📦 Ship it tomorrow, rested',
+      '🗝️ Lock the screen, unlock your evening',
+      '🎬 Roll the credits on today',
+      '🌌 The stars are out. So should you be.',
+      '🫖 Last tea, then lights out',
+      '👟 Shoes on, screen off',
+    ],
+  },
+  ar: {
+    early: [
+      '🍪 استراحة سناك بتنحسب كمان',
+      '🌿 شهيق أفكار، زفير بقّ',
+      '🧩 مشكلة وحدة بالمرة',
+      '📻 موسيقى بالخلفية، تركيز بالواجهة',
+      '🖊️ اكتبها قبل ما تطير من بالك',
+      '🫶 كون منيح مع حالك تبع بكرا',
+      '🌅 نَفَس الصبح، راس صافي',
+      '🧭 اعرف لوين رايح قبل ما تعمل push',
+      '🧁 الانتصارات الصغيرة طعمها أحلى',
+      '🪴 خلّي الكود يكبر على مهله',
+      '🎈 خلّيها خفيفة وخلّيها شغّالة',
+      '🧘 بس كوميتات هادية',
+      '📚 اقرا رسالة الخطأ. كلها.',
+      '🔍 بعّد شوي وشوف الصورة كاملة',
+      '🗂️ تابات مرتّبة، راس مرتّب',
+      '☁️ ما في عجلة، السحابة بتستنّى',
+      '🐣 بداية جديدة — لا تكسر إشي',
+    ],
+    mid: [
+      '🚰 عبّي قنينة المي',
+      '🦶 حرّك أصابيع إجريك. جد.',
+      '🌳 في شجر برّا. على ذمّتهم.',
+      '🧃 استراحة عصير؟ استراحة عصير.',
+      '🤸 قوم، تمطّى، وارجع اقعد أذكى',
+      '🫁 تلات أنفاس بطيئة. يلّا.',
+      '🪟 افتح الشباك، خلّي البقّ يطلع',
+      '🐈 حتى القطط بتريّح بين نومة ونومة',
+      '💡 ابعد شوي — الحل بيلاقيك بالممر',
+      '🧊 هدّي حالك قبل git push --force',
+      '🕺 ارقص عشر ثواني. ما حدا شايفك.',
+      '🍎 كول إشي مش قهوة',
+      '🎮 مش هلّق. بعدين. يمكن.',
+      '📞 اتصل بإمك',
+      '🧹 سكّر التابات اللي عمرك ما رح تقراها',
+      '⌚ ظهرك قدّم شكوى',
+      '🛁 أفكار الدوش بتصلّح بقّ ببلاش',
+    ],
+    late: [
+      '🏠 وقت البيت ميزة، مش بقّ',
+      '🔕 ممنوع الإزعاج: إنت، قريباً',
+      '🫡 شغل منيح اليوم. جد.',
+      '🧾 اكتب أول مهمة لبكرا هلّق',
+      '🌆 اليوم قرّب يخلص نَفَساته',
+      '🧦 شلّح الكلسات، وسكّر اللابتوب',
+      '🍲 العشا أحسن من أي نشر',
+      '🛌 التخت أهم من البقّ',
+      '🔋 اشحن حالك، مش بس اللابتوب',
+      '🥱 هالتثاؤب طلب دمج من جسمك',
+      '📦 انشرها بكرا وإنت مرتاح',
+      '🗝️ اقفل الشاشة، وافتح سهرتك',
+      '🎬 خلص الفيلم تبع اليوم',
+      '🌌 النجوم طلعت. وإنت كمان اطلع.',
+      '🫖 آخر كاسة شاي، وبعدين طفّي الضو',
+      '👟 البس الكندرة، وطفّي الشاشة',
+    ],
+  },
+  he: {
+    early: [
+      '🍪 גם הפסקת נשנוש נחשבת',
+      '🌿 שואפים רעיונות, נושפים באגים',
+      '🧩 בעיה אחת בכל פעם',
+      '📻 מוזיקה ברקע, פוקוס בחזית',
+      '🖊️ תרשום לפני שזה בורח',
+      '🫶 תהיה נחמד לעצמך של מחר',
+      '🌅 שאכטה של בוקר, ראש צלול',
+      '🧭 תדע לאן אתה הולך לפני שאתה דוחף',
+      '🧁 ניצחונות קטנים טעימים יותר',
+      '🪴 תן לקוד לגדול לאט',
+      '🎈 קליל ועובד',
+      '🧘 רק קומיטים רגועים',
+      '📚 תקרא את הודעת השגיאה. את כולה.',
+      '🔍 תתרחק רגע ותראה את התמונה המלאה',
+      '🗂️ טאבים מסודרים, ראש מסודר',
+      '☁️ אין לחץ, הענן יחכה',
+      '🐣 התחלה חדשה — אל תשבור כלום',
+    ],
+    mid: [
+      '🚰 תמלא את בקבוק המים',
+      '🦶 תזיז את אצבעות הרגליים. ברצינות.',
+      '🌳 יש עצים בחוץ. ככה אומרים.',
+      '🧃 הפסקת מיץ? הפסקת מיץ.',
+      '🤸 קום, תתמתח, ותחזור חכם יותר',
+      '🫁 שלוש נשימות איטיות. יאללה.',
+      '🪟 תפתח חלון, תן לבאגים לצאת',
+      '🐈 גם חתולים נחים בין תנומה לתנומה',
+      '💡 תתרחק קצת — הפתרון יפגוש אותך במסדרון',
+      '🧊 תירגע לפני git push --force',
+      '🕺 תרקוד עשר שניות. אף אחד לא רואה.',
+      '🍎 תאכל משהו שהוא לא קפה',
+      '🎮 לא עכשיו. אחר כך. אולי.',
+      '📞 תתקשר לאמא',
+      '🧹 תסגור את הטאבים שלעולם לא תקרא',
+      '⌚ הגב שלך הגיש תלונה',
+      '🛁 מחשבות במקלחת פותרות באגים בחינם',
+    ],
+    late: [
+      '🏠 זמן בית זה פיצ׳ר, לא באג',
+      '🔕 נא לא להפריע: אתה, בקרוב',
+      '🫡 עבודה טובה היום. באמת.',
+      '🧾 תרשום עכשיו את המשימה הראשונה של מחר',
+      '🌆 ליום כמעט נגמרו השאכטות',
+      '🧦 גרביים למטה, מחשב סגור',
+      '🍲 ארוחת ערב עדיפה על כל דיפלוי',
+      '🛌 מיטה > באגים',
+      '🔋 תטען את עצמך, לא רק את הלפטופ',
+      '🥱 הפיהוק הזה הוא פול ריקווסט מהגוף שלך',
+      '📦 תשחרר את זה מחר, נח',
+      '🗝️ תנעל את המסך, תפתח את הערב',
+      '🎬 כתוביות סיום להיום',
+      '🌌 הכוכבים בחוץ. גם אתה צריך להיות.',
+      '🫖 תה אחרון, ואז מכבים אור',
+      '👟 נעליים על הרגליים, מסך כבוי',
+    ],
+  },
+}
+
 // بعد نص الليل الجمل بتمسخر عليك ({time} = الساعة هلّق).
 const NIGHT: Record<Lang, readonly string[]> = {
   en: [
@@ -254,6 +433,53 @@ const NIGHT: Record<Lang, readonly string[]> = {
     '🕯️ שום דבר טוב לא עולה למיין אחרי אחת בלילה',
     '🛌 המיטה שלך פתחה טיקט: משתמש נעדר מאז {time}',
     '🌚 אתה של מחר יעשה ריוויו לקוד הזה. תרחם עליו.',
+  ],
+}
+
+
+// دفعة تانية لنكت الليل (المجموع 18 بكل لغة).
+const MORE_NIGHT: Record<Lang, readonly string[]> = {
+  en: [
+    '🦇 Bats are up. Bats don’t code.',
+    '🌃 The city is asleep. Your code can wait.',
+    '☕ Coffee at {time} is a cry for help',
+    '🧟 Night-coding zombie mode: on',
+    '📉 Bug density rises after midnight. Science.',
+    '🛏️ Your pillow pinged you. Status: urgent.',
+    '🕰️ {time}. Nothing good ever started at {time}.',
+    '👻 Even the ghosts went to bed',
+    '🔦 Nobody writes clean code at {time}',
+    '🫠 Your brain is at 3% battery',
+    '🐓 The rooster will judge you',
+    '🚪 The kitchen called: drink water and go to sleep',
+  ],
+  ar: [
+    '🦇 الوطاويط صاحية. الوطاويط ما بتبرمج.',
+    '🌃 البلد نايمة. والكود بيستنّى.',
+    '☕ قهوة الساعة {time}؟ هاي استغاثة',
+    '🧟 وضع زومبي البرمجة الليلية: شغّال',
+    '📉 البقّ بيكتر بعد نص الليل. علم.',
+    '🛏️ مخدّتك بعتتلك إشعار: مستعجل',
+    '🕰️ الساعة {time}. ولا إشي منيح بلّش هالساعة.',
+    '👻 حتى الأشباح راحت تنام',
+    '🔦 ما حدا بيكتب كود نضيف الساعة {time}',
+    '🫠 مخّك على 3% بطارية',
+    '🐓 الديك رح يحاسبك',
+    '🚪 المطبخ اتصل: اشرب مي وروح نام',
+  ],
+  he: [
+    '🦇 העטלפים ערים. עטלפים לא כותבים קוד.',
+    '🌃 העיר ישנה. הקוד יחכה.',
+    '☕ קפה ב־{time}? זו קריאה לעזרה',
+    '🧟 מצב זומבי של קוד לילי: פעיל',
+    '📉 צפיפות הבאגים עולה אחרי חצות. מדע.',
+    '🛏️ הכרית שלך שלחה התראה: דחוף',
+    '🕰️ השעה {time}. שום דבר טוב לא התחיל בשעה כזאת.',
+    '👻 אפילו הרוחות הלכו לישון',
+    '🔦 אף אחד לא כותב קוד נקי ב־{time}',
+    '🫠 למוח שלך נשארו 3% סוללה',
+    '🐓 התרנגול ישפוט אותך',
+    '🚪 המטבח התקשר: תשתה מים ותלך לישון',
   ],
 }
 
@@ -310,21 +536,52 @@ export function seedOf(dayKeyText: string, butts: number): number {
 }
 
 // بعد ما تخلص، الرسالة الجاية بتولّع وحدة جديدة من الباكيت (أو بتلفّ جوينت جديد) — مع رقمها اليوم.
-const FRESH: Record<Style, Record<Lang, string>> = {
+const FRESH: Record<Style, Record<Lang, readonly string[]>> = {
   cigarette: {
-    en: '📦 Fresh one from the pack — #{n} today',
-    ar: '📦 سيجارة جديدة من الباكيت — رقم {n} اليوم',
-    he: '📦 סיגריה חדשה מהחפיסה — מספר {n} היום',
+    en: [
+      '📦 Fresh one from the pack — #{n} today',
+      '🚬 Another one lit — #{n} today',
+      '🔥 Flick, flame, lit — #{n} today',
+      '📦 The pack is getting lighter — #{n} today',
+    ],
+    ar: [
+      '📦 سيجارة جديدة من الباكيت — رقم {n} اليوم',
+      '🚬 ولّعنا وحدة كمان — رقم {n} اليوم',
+      '🔥 طقّة، شعلة، ولعت — رقم {n} اليوم',
+      '📦 الباكيت عم يخفّ — رقم {n} اليوم',
+    ],
+    he: [
+      '📦 סיגריה חדשה מהחפיסה — מספר {n} היום',
+      '🚬 הדלקנו עוד אחת — מספר {n} היום',
+      '🔥 טיק, להבה, דולקת — מספר {n} היום',
+      '📦 החפיסה מתרוקנת — מספר {n} היום',
+    ],
   },
   joint: {
-    en: '🌿 Rolled a fresh one — #{n} today',
-    ar: '🌿 لفّينا جوينت جديد — رقم {n} اليوم',
-    he: '🌿 גלגלנו ג׳וינט חדש — מספר {n} היום',
+    en: [
+      '🌿 Rolled a fresh one — #{n} today',
+      '🌿 Licked, sealed, lit — #{n} today',
+      '🌀 Fresh roll, same chill — #{n} today',
+      '🌿 Another one rolled — #{n} today',
+    ],
+    ar: [
+      '🌿 لفّينا جوينت جديد — رقم {n} اليوم',
+      '🌿 لحسنا، سكّرنا، ولّعنا — رقم {n} اليوم',
+      '🌀 لفّة جديدة، نفس الروقان — رقم {n} اليوم',
+      '🌿 لفّينا كمان واحد — رقم {n} اليوم',
+    ],
+    he: [
+      '🌿 גלגלנו ג׳וינט חדש — מספר {n} היום',
+      '🌿 ליקקנו, סגרנו, הדלקנו — מספר {n} היום',
+      '🌀 גלגול חדש, אותו צ׳יל — מספר {n} היום',
+      '🌿 גלגלנו עוד אחד — מספר {n} היום',
+    ],
   },
 }
 
 export function freshLine(kind: Style, ln: Lang, n: number): string {
-  return FRESH[kind][ln].replace('{n}', String(n))
+  const pool = FRESH[kind][ln]
+  return (pool[Math.max(0, n - 2) % pool.length] ?? '').replace('{n}', String(n))
 }
 
 // earlier = كم سيجارة خلصت اليوم قبل هاي.
@@ -334,10 +591,14 @@ export function tagline(kind: Style, ln: Lang, puffs: number, now: number, seed 
   const time = clockText(now, ln)
   if (phase === 'dawn' && puffs === 0) return DAWN[ln].replace('{time}', time)
   if (puffs === 1 && earlier > 0) return freshLine(kind, ln, earlier + 1)
-  if (phase !== 'day') return (NIGHT[ln][puffs % NIGHT[ln].length] ?? '').replace('{time}', time)
+  if (phase !== 'day') {
+    const night = [...NIGHT[ln], ...MORE_NIGHT[ln]]
+    return (night[(puffs + seed) % night.length] ?? '').replace('{time}', time)
+  }
   if (puffs === 0) return KINDS[kind].lit[ln]
   const f = puffs / PUFFS
-  const pool = LINES[ln][f < 1 / 3 ? 'early' : f < 2 / 3 ? 'mid' : 'late']
+  const stage = f < 1 / 3 ? 'early' : f < 2 / 3 ? 'mid' : 'late'
+  const pool = [...LINES[ln][stage], ...MORE_LINES[ln][stage]]
   return pool[(puffs + seed) % pool.length] ?? ''
 }
 
@@ -393,11 +654,107 @@ const WARNINGS: Record<Lang, { all: readonly string[]; joint: readonly string[] 
   },
 }
 
+
+// دفعة تانية: 20 تحذير كمان بكل لغة + 4 للجوينت (المجموع 30 + 6).
+const MORE_WARNINGS: Record<Lang, { all: readonly string[]; joint: readonly string[] }> = {
+  en: {
+    all: [
+      'Merging on Friday may cause weekend loss',
+      'Copy-pasting from Stack Overflow is habit-forming',
+      'Every TODO you write is a promise you will break',
+      'Side effects include tabs-versus-spaces arguments',
+      'Long-term use makes you say “it works on my machine”',
+      'Not suitable for production before coffee',
+      'Causes sudden attachment to dark mode',
+      'Keep out of reach of product managers',
+      'May contain traces of legacy code',
+      'Do not operate heavy deploys while tired',
+      'Ships with zero tests and 100% confidence',
+      'Linked to severe cases of “just one quick fix”',
+      'Excessive use causes 47 open browser tabs',
+      'Mixing with Jira may cause headaches',
+      'Causes premature optimization',
+      'Regular use leads to variables named temp2_final_v3',
+      'May cause a deep emotional bond with your terminal',
+      'Inhaling stack traces is harmful to your health',
+      'This commit message will not age well',
+      'Quitting now lowers your risk of a 3am hotfix',
+    ],
+    joint: [
+      'Variables named while high will make no sense tomorrow',
+      'May cause you to rename everything to “vibes”',
+      'Do not push to production while giggling',
+      'Causes snack-driven development',
+    ],
+  },
+  ar: {
+    all: [
+      'الدمج يوم الجمعة بيسبّب ضياع الويكند',
+      'النسخ من Stack Overflow بيسبّب إدمان',
+      'كل TODO بتكتبها وعد رح تخلفه',
+      'الأعراض الجانبية: خناقات tabs ولا spaces',
+      'الاستعمال الطويل بيخلّيك تقول «عندي شغّال»',
+      'مش مناسب للإنتاج قبل القهوة',
+      'بيسبّب تعلّق مفاجئ بالوضع الليلي',
+      'يُحفظ بعيداً عن متناول مدراء المنتج',
+      'قد يحتوي على آثار كود قديم',
+      'لا تشغّل نشر تقيل وإنت تعبان',
+      'بيجي مع صفر تيستات و100% ثقة',
+      'مرتبط بحالات شديدة من «تصليح سريع وبس»',
+      'الاستعمال الزايد بيسبّب 47 تاب مفتوحة',
+      'خلطه مع Jira بيسبّب وجع راس',
+      'بيسبّب تحسين أداء قبل أوانه',
+      'الاستعمال المنتظم بيخلّيك تسمّي المتغيّرات temp2_final_v3',
+      'بيسبّب علاقة عاطفية عميقة مع التيرمنال',
+      'استنشاق رسائل الخطأ مضرّ بالصحة',
+      'رسالة هالكوميت ما رح تكبر منيح',
+      'الإقلاع هلّق بيقلّل خطر تصليح طارئ الساعة 3 بالليل',
+    ],
+    joint: [
+      'المتغيّرات اللي بتسمّيها وإنت مسطول ما رح تفهمها بكرا',
+      'بيسبّب إنك تسمّي كل إشي «vibes»',
+      'ممنوع push عالإنتاج وإنت عم تضحك',
+      'بيسبّب برمجة مدفوعة بالسناكات',
+    ],
+  },
+  he: {
+    all: [
+      'מיזוג ביום שישי עלול לגרום לאובדן סוף השבוע',
+      'העתקה מ־Stack Overflow ממכרת',
+      'כל TODO שאתה כותב הוא הבטחה שתפר',
+      'תופעות לוואי: ויכוחים על טאבים מול רווחים',
+      'שימוש ממושך גורם להגיד ״אצלי זה עובד״',
+      'לא מתאים לפרודקשן לפני קפה',
+      'גורם להתאהבות פתאומית במצב כהה',
+      'להרחיק מהישג ידם של מנהלי מוצר',
+      'עלול להכיל עקבות של קוד לגאסי',
+      'אין להפעיל דיפלויים כבדים כשאתה עייף',
+      'מגיע עם אפס טסטים ו־100% ביטחון',
+      'קשור למקרים קשים של ״רק תיקון קטן״',
+      'שימוש מופרז גורם ל־47 טאבים פתוחים',
+      'שילוב עם ג׳ירה עלול לגרום לכאב ראש',
+      'גורם לאופטימיזציה מוקדמת',
+      'שימוש קבוע גורם לקרוא למשתנים temp2_final_v3',
+      'עלול לגרום לקשר רגשי עמוק עם הטרמינל',
+      'שאיפת סטאק טרייסים מזיקה לבריאות',
+      'הודעת הקומיט הזאת לא תזדקן טוב',
+      'הפסקה עכשיו מפחיתה את הסיכון להוטפיקס בשלוש בלילה',
+    ],
+    joint: [
+      'משתנים שנקראו כשהיית מסטול לא יהיו הגיוניים מחר',
+      'עלול לגרום לך לקרוא לכל דבר ״וייבס״',
+      'אין לדחוף לפרודקשן תוך כדי צחקוקים',
+      'גורם לפיתוח מונחה נשנושים',
+    ],
+  },
+}
+
 // كل التحذيرات بالترتيب، بادئين من تحذير هالنَّفَس — الرسمة بتلفّ عليهم لحالها.
 export function warnings(kind: Style, ln: Lang, puffs: number, seed = 0): string[] {
   const w = WARNINGS[ln]
-  const pool = kind === 'joint' ? [...w.joint, ...w.all] : w.all
-  // خطوة 7 (ما بتقسم 10 ولا 12) — عشان يمرّوا كل التحذيرات قبل ما يتكرّروا.
+  const m = MORE_WARNINGS[ln]
+  const pool = kind === 'joint' ? [...w.joint, ...m.joint, ...w.all, ...m.all] : [...w.all, ...m.all]
+  // خطوة 7 (ما بتقسم 30 ولا 36) — عشان يمرّوا كل التحذيرات قبل ما يتكرّروا.
   const start = (puffs * 7 + seed) % pool.length
   return [...pool.slice(start), ...pool.slice(0, start)].map(t => WARN_PREFIX[ln] + t)
 }
@@ -477,11 +834,118 @@ export function lastPuff(kind: Style): string {
 }
 
 // آخر الجوينت: الشغل نفسه بيضل حادّ، بس السطر الأخير رايق.
-export const JOINT_CHILL =
-  "[chat-cigarette] The user is near the end of their 'chat joint' (a playful screen-time " +
-  'mod they installed). Do the actual work exactly as you normally would: same precision, ' +
-  'same code, nothing hazier. Only after the reply is complete, add one short, laid-back ' +
-  'sign-off line (in their language), like a relaxed friend winding down. One line, no more.'
+// 30 سطر رايق بكل لغة — كل نَفَس بيوصل لكلود سطر غير اللي قبله، عشان ما يتكرّر (كريم).
+const CHILL: Record<Lang, readonly string[]> = {
+  en: [
+    'Easy now — the code’s not going anywhere 🍃',
+    'Slow puffs, clean diffs ✌️',
+    'Ride the wave, review it tomorrow 🌊',
+    'All good, all chill, all committed 😌',
+    'Breathe in, ship out… gently 🍃',
+    'No rush — the bugs are chilling too',
+    'Stay smooth, friend 🌿',
+    'Let it simmer, it’ll taste better tomorrow',
+    'Vibes checked, tests next ✅',
+    'Low and slow, like good barbecue 🔥',
+    'The terminal says: relax',
+    'Keep it mellow, keep it merged',
+    'Float on, coder ☁️',
+    'Peace, love and green tests ✌️',
+    'Take it easy — tomorrow-you says thanks',
+    'Kick back, the compiler’s got this',
+    'Smooth sailing from here ⛵',
+    'Chill mode: on. Precision: also on.',
+    'One puff at a time 🍃',
+    'Snacks recommended, deploys optional 🍪',
+    'Exhale. It works. Probably. 😌',
+    'Soft lights, clean logs',
+    'Steady hands, mellow mind',
+    'All quiet on the stack-trace front',
+    'Let the fans spin, not your head',
+    'Cruising speed reached 🛋️',
+    'Good code, good company, good night soon',
+    'Lean back — the hard part’s done',
+    'Cool breeze, warm laptop',
+    'Easy does it, my friend 🌿',
+  ],
+  ar: [
+    'عالهدا… الكود مش رايح لمحل 🍃',
+    'نَفَس بطيء، diff نضيف ✌️',
+    'امشي مع الموجة، وراجعها بكرا 🌊',
+    'كلشي تمام، كلشي رايق، كلشي متكومت 😌',
+    'شهيق، ونشر… بس على مهل 🍃',
+    'ما في عجلة، حتى البقّ رايق',
+    'خليك سلس يا صاحبي 🌿',
+    'خلّيها تستوي، بكرا طعمها أطيب',
+    'المزاج تمام، التيستات بعدين ✅',
+    'على نار هادية، متل الشوي المنيح 🔥',
+    'التيرمنال بقلك: روق',
+    'خلّيها هادية وخلّيها مدموجة',
+    'طير على مهلك يا مبرمج ☁️',
+    'سلام، حب، وتيستات خضرا ✌️',
+    'روق — إنت تبع بكرا رح يشكرك',
+    'ارتاح، الكومبايلر ماسك الشغل',
+    'من هون ورايح بحر هادي ⛵',
+    'وضع الروقان: شغّال. الدقة: كمان شغّالة.',
+    'نَفَس نَفَس 🍃',
+    'السناك منصوح فيه، النشر اختياري 🍪',
+    'زفير. شغّال. على الأغلب. 😌',
+    'ضو خفيف، لوغات نضيفة',
+    'إيد ثابتة، وبال رايق',
+    'كلشي هادي على جبهة الأخطاء',
+    'خلّي المراوح تلفّ، مش راسك',
+    'وصلنا سرعة الكروز 🛋️',
+    'كود منيح، صحبة منيحة، ونوم قريب',
+    'رجّع ظهرك لورا — الصعب خلص',
+    'نسمة باردة، لابتوب دافي',
+    'على مهلك يا صاحبي 🌿',
+  ],
+  he: [
+    'לאט לאט — הקוד לא בורח 🍃',
+    'שאכטות איטיות, דיפים נקיים ✌️',
+    'תזרום עם הגל, תעשה ריוויו מחר 🌊',
+    'הכול טוב, הכול רגוע, הכול בקומיט 😌',
+    'שאיפה, ודיפלוי… בעדינות 🍃',
+    'אין לחץ, גם הבאגים בצ׳יל',
+    'תישאר חלק, אחי 🌿',
+    'תן לזה להתבשל, מחר זה יהיה טעים יותר',
+    'הווייב נבדק, הטסטים בהמשך ✅',
+    'על אש קטנה, כמו מנגל טוב 🔥',
+    'הטרמינל אומר: תירגע',
+    'רגוע וממוזג',
+    'תרחף לאט, מתכנת ☁️',
+    'שלום, אהבה וטסטים ירוקים ✌️',
+    'קח את זה בקלות — אתה של מחר יגיד תודה',
+    'תשען אחורה, הקומפיילר מטפל בזה',
+    'מפה זה שיט רגוע ⛵',
+    'מצב צ׳יל: פעיל. דיוק: גם פעיל.',
+    'שאכטה אחרי שאכטה 🍃',
+    'נשנושים מומלצים, דיפלוי אופציונלי 🍪',
+    'נשיפה. זה עובד. כנראה. 😌',
+    'אור רך, לוגים נקיים',
+    'יד יציבה, ראש רגוע',
+    'שקט בחזית הסטאק טרייס',
+    'שהמאווררים יסתובבו, לא הראש',
+    'הגענו למהירות שיוט 🛋️',
+    'קוד טוב, חברה טובה, ולילה טוב בקרוב',
+    'תשען אחורה — החלק הקשה מאחוריך',
+    'בריזה קרירה, לפטופ חמים',
+    'בנחת, אחי 🌿',
+  ],
+}
+
+// اللي كلود بيقراه بآخر الجوينت، مع سطر هالنَّفَس بالتلات لغات (بيختار لغة المستخدم).
+export function jointChill(i: number): string {
+  const pick = (ln: Lang) => CHILL[ln][i % CHILL[ln].length] ?? ''
+  return (
+    "[chat-cigarette] The user is near the end of their 'chat joint' (a playful screen-time " +
+    'mod they installed). Do the actual work exactly as you normally would: same precision, ' +
+    'same code, nothing hazier. Only after the reply is complete, add one short, laid-back ' +
+    'sign-off line in the user’s language. Use this puff’s line (word for word, or a light ' +
+    `natural tweak) so it doesn’t repeat: EN «${pick('en')}» · AR «${pick('ar')}» · HE «${pick('he')}». ` +
+    'One line, no more.'
+  )
+}
 
 // ردود الأوامر.
 export const SAID = {

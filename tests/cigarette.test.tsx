@@ -398,7 +398,7 @@ test('around 4am a new cigarette will not light, and the message still goes thro
   await ui.unmount()
 })
 
-test('all ten warnings live in the drawing and cycle by themselves; a still image shows one', async ($, on) => {
+test('all thirty warnings live in the drawing and cycle by themselves; a still image shows one', async ($, on) => {
   mock.clock(on, { now: NOON })
   mock.store(on)
   mock.env(on, {})
@@ -408,8 +408,8 @@ test('all ten warnings live in the drawing and cycle by themselves; a still imag
   await $.session.start({ cwd: '/tmp', surface: 'desktop', isInteractive: true })
   const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
   const source = svgSource(await ui.drawn())
-  expect(source.split('WARNING:').length - 1).toBe(10)
-  expect(source).toContain('attributeName="opacity" dur="50s"')
+  expect(source.split('WARNING:').length - 1).toBe(30)
+  expect(source).toContain('attributeName="opacity" dur="150s"')
   await ui.unmount()
 })
 
@@ -569,7 +569,7 @@ test('a joint picked with the old /smoke (before 0.4) is still remembered', asyn
   await ui.unmount()
 })
 
-test('the band always fits its rows, so it never scrolls (Windows has fewer rows)', async ($, on) => {
+test('the terminal band fits its rows; the desktop drawing keeps its natural size', async ($, on) => {
   mock.clock(on, { now: NOON })
   on('session.measure', ($, e) => ({ changed: e.changed }))
   await $.session.measure({
@@ -584,11 +584,44 @@ test('the band always fits its rows, so it never scrolls (Windows has fewer rows
     expect(box.children.length + 2).toBeLessThanOrEqual(Math.max(4, maxRows))
     await term.unmount()
 
+    // بالديسكتوب الرسمة بحجمها الطبيعي — بلا width/height (تصغيرها خرّب الشكل بالماك).
     const desk = await $.ui.mount({ ...BAND, surface: 'desktop', props })
     const tree = (await desk.drawn()) as unknown as { children: { type: string; props: { height?: number } }[] }
-    const svg = tree.children.find(c => c.type === 'Svg')
-    const textRows = tree.children.length - 1
-    expect(svg?.props.height).toBeLessThanOrEqual(Math.max(56, (maxRows - textRows) * 16))
+    expect(tree.children.find(c => c.type === 'Svg')?.props.height).toBeUndefined()
     await desk.unmount()
   }
+})
+
+test('the chill sign-off line changes every puff (from a pool of 30, in all three languages)', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on)
+  const contexts: string[] = []
+  on('prompt.submit', ($, e) => {
+    contexts.push((e.context ?? []).join(' '))
+    return { text: e.text, context: e.context }
+  })
+  await $.command.run({ command: 'smoke', args: 'joint', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
+  for (let i = 0; i < 19; i++) await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+  const chill = contexts.slice(13, 19)
+  expect(new Set(chill).size).toBe(6)
+  for (const c of chill) {
+    expect(c).toContain('EN «')
+    expect(c).toContain('AR «')
+    expect(c).toContain('HE «')
+  }
+})
+
+test('there are a hundred status lines per language, so they rarely repeat', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  const seen = new Set<string>()
+  for (let i = 0; i < 19; i++) {
+    await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+    const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+    const texts = await ui.findAll({ type: 'Text' })
+    const line = texts.map(t => t.text).find(t => /^\p{Extended_Pictographic}/u.test(t ?? '') && !/⚠|WARNING/.test(t ?? ''))
+    if (line) seen.add(line)
+    await ui.unmount()
+  }
+  expect(seen.size).toBeGreaterThanOrEqual(18)
 })

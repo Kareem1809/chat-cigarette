@@ -12,7 +12,6 @@ import {
   CHILL_FROM,
   FRESH_PACK,
   INSTALL,
-  JOINT_CHILL,
   KINDS,
   METER,
   PUFFS,
@@ -23,6 +22,7 @@ import {
   contextDetail,
   dayKey,
   freshLine,
+  jointChill,
   lastPuff,
   nightPhase,
   outOfSmokes,
@@ -46,8 +46,6 @@ const lang = atom({ plugin: 'chat-cigarette', key: 'lang' } as const, 'en' as La
 const HUMAN = new Set(['composer', 'bridge', 'sdk'])
 
 const METER_CELLS = 14
-// كم بكسل بنحسب للسطر بالديسكتوب لما نقرّر قديش الرسمة بتكبر (أقل شوي من الحقيقي = أمان).
-const ROW_PX = 16
 const RAMP = ['▃', '▄', '▅', '▆', '▇'] as const
 const HEAP = [' ', '▁', '▂', '▃', '▄', '▅', '▆'] as const
 
@@ -244,7 +242,10 @@ export const register: Register = on => {
     if (isRelight) $.ui.toast(freshLine(kind, ln, dayView(s, now).butts.length + 1), { timeoutMs: 6000 })
 
     if (isLast) return next({ ...e, context: [...(e.context ?? []), lastPuff(kind)] })
-    if (kind === 'joint' && puffs >= CHILL_FROM) return next({ ...e, context: [...(e.context ?? []), JOINT_CHILL] })
+    if (kind === 'joint' && puffs >= CHILL_FROM) {
+      const i = puffs + dayView(s, now).butts.length * 7
+      return next({ ...e, context: [...(e.context ?? []), jointChill(i)] })
+    }
     return next(e)
   })
 
@@ -331,8 +332,8 @@ export const register: Register = on => {
     if (e.surface === 'desktop') {
       const { Box, Text, Svg } = $.ui.resolve(e)
       const noun = KINDS[kind].noun
-      // الشريط لازم يفوت كله بالمساحة اللي معه (maxRows) — غير هيك بيصير فيه سكرول
-      // (على ويندوز المساحة أصغر). العدّادين بسطر واحد إذا في عرض، والرسمة بتصغر لحالها.
+      // الرسمة بحجمها الطبيعي (تصغيرها حسب maxRows صغّرها لنص بالماك — كريم 0.9.2).
+      // بس بلا فراغ، والعدّادين بسطر واحد إذا في عرض، عشان الشريط يضل قصير قد ما بنقدر.
       const oneLine = e.props.bodyColumns >= 110
       const meterRow = (m: Meter) => {
         const b = meterBar(m.pct)
@@ -372,9 +373,6 @@ export const register: Register = on => {
           </Box>,
         )
       }
-      const natural = isOut ? 200 : 142
-      const svgH = Math.round(Math.max(56, Math.min(natural, (e.props.maxRows - rows.length) * ROW_PX)))
-      const svgW = Math.round((600 * svgH) / natural)
       return (
         <Box flexDirection="column">
           <Svg
@@ -384,8 +382,6 @@ export const register: Register = on => {
                 ? `Chat ${noun} burned out — ${REST_LINE} — ${card}`
                 : `Chat ${noun}: ${s.puffs} of ${PUFFS} puffs smoked — ${warn}`
             }
-            width={svgW}
-            height={svgH}
             isInteractive={!isWindows}
           />
           {rows}
