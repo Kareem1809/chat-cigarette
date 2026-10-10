@@ -1,13 +1,12 @@
 # 🚬🌿 Chat Cigarette — سيجارة المحادثة
 
-مود لـ **Claude Code** فيه نوعين — **سيجارة 🚬** و**جوينت 🌿** — وبتبدّل بيناتهم بأمر `/smoke`.
-أول كل شات بتنولّع فوق خانة الكتابة، وكل رسالة بتبعتها لكلود = نَفَس.
-لما تخلص السيجارة، كلود نفسه بيقلك: **It's time to get some rest 🍁**
+مود لـ **Claude Code**: فوق خانة الكتابة في سيجارة (أو جوينت) بتحترق نَفَس مع كل رسالة لكلود. لما تخلص، كلود بيقلك **It's time to get some rest 🍁**، وبيطلعلك كرت مشاركة فيه أرقام يومك. بيحكي **إنجليزي، عربي وعبري**.
 
-A Claude Code mod for smokers (and everyone else) who want to spend less time at the computer: a cigarette — or a joint, `/smoke` switches — burns down above the prompt, one puff per message. When it's finished, Claude tells you it's time to rest.
+A Claude Code mod for the daily smoke break: a cigarette (or a joint) burns down above the prompt, one puff per message, with fake pack warnings, a daily ashtray, a share card when it burns out, late-night roasts, and your 5-hour limit and context window at a glance. English, Arabic and Hebrew.
 
 ![cigarette](docs/burning.png)
 ![joint](docs/joint.png)
+![arabic](docs/arabic.png)
 ![burned out](docs/burned-out.png)
 
 ## التركيب — Install
@@ -18,32 +17,13 @@ A Claude Code mod for smokers (and everyone else) who want to spend less time at
 /plugin install chat-cigarette --marketplace Kareem1809/chat-cigarette
 ```
 
-بعدها اضغط `y` (إضافة الماركتبليس) و`Enter` (اختيار الـscope). خلص، بيشتغل فوراً — وبكل جلسة جديدة كمان، حتى بتاب Code بتطبيق Claude للديسكتوب.
+بعدها `y` (إضافة الماركتبليس) و`Enter` (الـscope). بيشتغل فوراً، وبكل جلسة جديدة، حتى بتاب Code بتطبيق Claude للديسكتوب.
 
-> The install line works in a terminal `claude` session (a recent Claude Code with function-hook mods — built and tested on 2.1.295). Once installed at user scope it also loads in the desktop app's Code tab.
-
-## كيف بيشتغل — How it works
-
-| | |
-|---|---|
-| 🔥 أول الشات | سيجارة جديدة، 20 نَفَس |
-| 💬 كل رسالة منك | نَفَس — السيجارة بتقصر والنقطة بتولّع (الإشعارات ورسائل البرامج ما بتنحسب) |
-| 💬 تحتها | جملة جديدة مع **كل** رسالة (18 جملة: بالأول خفيفة، بالنص «قوم تحرّك»، بالآخر «جهّز حالك ترتاح») |
-| 🌆 السما | بتبلّش غروب وبتغمق لليل مع كل نَفَس، والنجوم بتبيّن أكتر |
-| ⏳ وتحتها | `⏳ 5-hour limit ━━━━━━─────── 42% · resets in 2h 15m` — أخضر ← برتقالي ← أحمر |
-| 🍁 آخر نَفَس | كلود بيجاوبك وبيختم بـ «It's time to get some rest 🍁» + إشعار |
-| 🧹 `/clear` | سيجارة جديدة |
-| 🔁 `/smoke` | بدّل بين السيجارة والجوينت (`/smoke joint` · `/smoke cigarette`) |
-| 🔤 `/smokeen` · `/smokear` · `/smokehe` | الكتابة إنجليزي، عربي أو عبري (الافتراضي: سيجارة بالإنجليزي) — وكل اختيار بينحفظ للجلسات الجاية |
-
-- **Desktop app:** an animated SVG (smoke, glowing ember, puff dots). On **Windows** it is drawn as a still image: the animated version reloads on every change and blinks out for a moment there.
-- **Terminal:** a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~  7/20` or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`.
-- **Both:** a new status line with every message (English by default, `/smokear` Arabic, `/smokehe` Hebrew, `/smokeen` back to English) and the 5-hour limit, `⏳ 5-hour limit ━━━━━━─────── 42% · resets in 2h 15m`.
-- The sky goes from dusk to night as it burns.
+> Type the install line in a terminal `claude` session (built and tested on Claude Code 2.1.295). Once installed at user scope it also loads in the desktop app's Code tab.
 
 ## التحديث — Update
 
-لما ينزل إصدار جديد، من تيرمنال عادي (برّا `claude`):
+من تيرمنال عادي (برّا `claude`):
 
 ```bash
 claude plugin marketplace update chat-cigarette
@@ -52,13 +32,55 @@ claude plugin update chat-cigarette@chat-cigarette
 
 وبعدين سكّر Claude وافتحه من جديد.
 
+## شو فيه — What's in it
+
+| | |
+|---|---|
+| 🔥 كل رسالة = نَفَس | 20 نَفَس بالسيجارة. الإشعارات ورسائل البرامج ما بتنحسب |
+| ⚠️ تحذير الباكيت | شريط أبيض بإطار أسود متل الباكيت الحقيقي، وتحذير جديد مع كل نَفَس («WARNING: Your manager can smell this commit») |
+| 💬 جملة جديدة | 18 جملة بكل لغة: بالأول خفيفة، بالنص «قوم تحرّك»، بالآخر «جهّز حالك ترتاح» |
+| 🌆 السما | بتبلّش غروب وبتغمق لليل مع كل نَفَس |
+| 🧺 المنفضة | كل سيجارة بتخلص بتترك عقب بالمنفضة الصغيرة، والمنفضة بتضل لآخر اليوم (اليوم بيبلّش 5 الصبح). شغلك اليومي معدود بالأعقاب |
+| 📸 كرت المشاركة | لما تخلص: «It's time to get some rest»، أرقام اليوم (أعقاب · نَفَسات · الحدّ)، كل أعقاب اليوم بالمنفضة، وسطر التركيب. كل صورة شاشة بتصير دعاية |
+| 🌿 الجوينت بيروق | من النَّفَس 14، كلود بيختم كل رد بسطر رايق. الشغل نفسه بيضل بنفس الدقة |
+| ⏳ حدّ الـ5 ساعات | `⏳ ━━━━━━──────── 42%  5-hour limit · resets in 2h 15m` |
+| 📦 باكيت جديد | لما الحدّ يخلص: «Out of smokes — new pack in 1h 40m». ولما يتجدد: إشعار «New pack's here» |
+| 🧠 الكونتكست | `🧠 ━━━─────────── 23%  Context · 46k of 200k`. فوق الـ80% بيذكّرك بـ `/clear` (بتجيك معه سيجارة جديدة) |
+| 🌙 آخر الليل | بعد 12 بالليل الجمل بتمسخر عليك مع الساعة («It's 2:14am. Even your bugs went to sleep.»). ومن 4 لـ5 الصبح سيجارة جديدة ما بتولّع. هاد بالرسمة بس، ورسالتك بتروح عادي |
+| 🍁 آخر نَفَس | كلود بيجاوبك عادي وبيختم بـ «It's time to get some rest 🍁»، وبيطلعلك إشعار |
+| 🧹 `/clear` | سيجارة جديدة، والمنفضة بتضل |
+
+### الأوامر — Commands
+
+| | |
+|---|---|
+| `/smoke` | سيجارة ⇄ جوينت (`/smoke joint` · `/smoke cigarette`) |
+| `/smokeen` · `/smokear` · `/smokehe` | إنجليزي (الافتراضي) · عربي · عبري |
+
+كل اختيار بينحفظ للجلسات الجاية.
+
+## خصوصية — Fully offline
+
+المود ما بيحكي مع الإنترنت، وما بيشغّل أوامر، وما بيقرا ولا بيكتب ملفات. كل اللي بيلمسه هو حالة الجلسة ومخزن البلجن تبعه. وفي متغيّر واحد بيقراه (`OS`)، عشان يعرف إذا الجهاز ويندوز ويرسم صورة ثابتة هناك. بتقدر تتأكد بنفسك:
+
+```bash
+claude plugin validate .
+```
+
+بيعدّد كل إشي المود بيستعمله: `$.clock`, `$.command.register`, `$.env.get` (OS), `$.session.usage`, `$.state`, `$.store`, `$.ui.resolve`, `$.ui.toast`. ما في `$.http` ولا `$.process` ولا `$.fs`.
+
+- **Desktop app:** an animated SVG. On **Windows** it is a still image, because the animated version reloads on every change and blinks out for a moment there.
+- **Terminal:** a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~  7/20  ▬▬▬` or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`, the warning in reverse video, and the same meters.
+
 ## بدك سيجارة أطول أو أقصر؟
 
-بـ [`hooks/register.tsx`](hooks/register.tsx) غيّر الرقم:
+بـ [`hooks/words.ts`](hooks/words.ts):
 
 ```ts
-const PUFFS = 20
+export const PUFFS = 20
 ```
+
+كل الكلام (الجمل، التحذيرات، نكت الليل) بنفس الملف وبالتلات لغات.
 
 ## للمطوّرين — Development
 
