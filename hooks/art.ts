@@ -98,7 +98,7 @@ function frame(h: number, night: number): string {
 
 // ───────────── تحذير الباكيت ─────────────
 
-// مثلث أحمر فيه علامة تعجب بيضا (⚠) — بأول الشريط من جهة القراية (كريم: أحمر مش أصفر).
+// مثلث أحمر فيه علامة تعجب بيضا (⚠) — على طرفي الشريط (كريم: أحمر مش أصفر).
 function warnIcon(x: number, y: number): string {
   return `<g transform="translate(${x} ${y})"><path d="M 0 -8.5 L 9.5 8 L -9.5 8 Z" fill="#e0312b" stroke="#8e1712" stroke-width="1.6" stroke-linejoin="round"/>
 <rect x="-1.15" y="-3.6" width="2.3" height="6.6" rx="1" fill="#ffffff"/><circle cx="0" cy="5.4" r="1.25" fill="#ffffff"/></g>`
@@ -107,9 +107,9 @@ function warnIcon(x: number, y: number): string {
 // شريط أبيض بإطار أسود متل تحذيرات الباكيت الحقيقية. بالرسمة المتحركة كل التحذيرات
 // جوّاته وبيتبدّلوا لحالهم كل 5 ثواني (بلا إعادة تحميل)؛ بالصورة الثابتة بيبيّن الأول بس.
 function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): string {
+  // الجملة بالنص (كريم)، ومثلث أحمر من الجهتين.
   const rtl = ln !== 'en'
-  const tx = rtl ? 552 : 48
-  const attrs = `x="${tx}" y="25.6" text-anchor="start"${rtl ? ' direction="rtl"' : ''} font-family="'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#0b0b0b"`
+  const attrs = `x="300" y="25.6" text-anchor="middle"${rtl ? ' direction="rtl"' : ''} font-family="'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#0b0b0b"`
   const list = animated ? texts : texts.slice(0, 1)
   const n = list.length
   const each = 5
@@ -132,7 +132,8 @@ function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): st
     })
     .join('\n')
   return `<rect x="16" y="9" width="568" height="25" rx="2" fill="#f6f3ec" stroke="#0b0b0b" stroke-width="2.5"/>
-${warnIcon(rtl ? 570 : 30, 21.5)}
+${warnIcon(30, 21.5)}
+${warnIcon(570, 21.5)}
 ${lines}`
 }
 

@@ -422,10 +422,15 @@ export const register: Register = on => {
       if (isOut) {
         rows.push(<Text key="stats" color="#c8b6ff" bold>{card}</Text>)
       } else {
+        // التحذير بنص الشريط، ومربّع أحمر فيه ⚠ من الجهتين.
+        const room = inner - 6
+        const body = ` ${warn} `
+        const padL = Math.max(0, Math.floor((room - body.length) / 2))
         rows.push(
           <Box key="warn" flexDirection="row">
             <Text inverse bold color="#e0312b">{' ⚠ '}</Text>
-            <Text inverse bold wrap="truncate">{` ${warn} `.padEnd(inner - 3)}</Text>
+            <Text inverse bold wrap="truncate">{(' '.repeat(padL) + body).padEnd(room)}</Text>
+            <Text inverse bold color="#e0312b">{' ⚠ '}</Text>
           </Box>,
         )
       }
