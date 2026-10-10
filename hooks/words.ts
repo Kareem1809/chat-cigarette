@@ -8,6 +8,7 @@ export const PUFFS = 20
 // من أي نَفَس الجوينت بيروق وكلود بيختم كل رد بسطر رايق.
 export const CHILL_FROM = 14
 
+// كريم (11/10): 🍁 بدل 🌙 — بكل مكان، ولا قمر بأي جملة جديدة.
 export const REST_LINE = "It's time to get some rest 🍁"
 
 export const INSTALL = '/plugin install chat-cigarette --marketplace Kareem1809/chat-cigarette'
@@ -70,7 +71,7 @@ const LINES: Record<Lang, Lines> = {
     ],
     late: [
       '🕯️ Last few puffs — get ready to rest',
-      '🌙 Wrapping up soon — save your work',
+      '🍁 Wrapping up soon — save your work',
       '🔥 Almost down to the end',
       '📌 Note where you stopped — pick it up tomorrow',
       '🛏️ Your bed misses you',
@@ -96,7 +97,7 @@ const LINES: Record<Lang, Lines> = {
     ],
     late: [
       '🕯️ آخر كم نَفَس — جهّز حالك ترتاح',
-      '🌙 قرّبنا نخلص — احفظ شغلك',
+      '🍁 قرّبنا نخلص — احفظ شغلك',
       '🔥 قرّبنا للآخر',
       '📌 سجّل وين وقفت — بتكمّل بكرا',
       '🛏️ تختك مشتاقلك',
@@ -122,7 +123,7 @@ const LINES: Record<Lang, Lines> = {
     ],
     late: [
       '🕯️ עוד כמה שאכטות — תתכונן לנוח',
-      '🌙 עוד מעט מסיימים — תשמור את העבודה',
+      '🍁 עוד מעט מסיימים — תשמור את העבודה',
       '🔥 כמעט הגענו לסוף',
       '📌 תרשום איפה עצרת — תמשיך מחר',
       '🛏️ המיטה מתגעגעת אליך',
@@ -134,7 +135,7 @@ const LINES: Record<Lang, Lines> = {
 // بعد نص الليل الجمل بتمسخر عليك ({time} = الساعة هلّق).
 const NIGHT: Record<Lang, readonly string[]> = {
   en: [
-    '🌙 It’s {time}. Even your bugs went to sleep.',
+    '🍁 It’s {time}. Even your bugs went to sleep.',
     '🦉 Past midnight: only owls and on-call engineers are up',
     '😴 Even the lighter is yawning',
     '🕯️ Nothing good gets merged after 1am',
@@ -142,7 +143,7 @@ const NIGHT: Record<Lang, readonly string[]> = {
     '🌚 Tomorrow-you will review this code. Be kind to them.',
   ],
   ar: [
-    '🌙 الساعة {time} يا صاحبي… حتى البقّ نام',
+    '🍁 الساعة {time} يا صاحبي… حتى البقّ نام',
     '🦉 بعد نص الليل ما بيسهر غير البوم وصاحب المناوبة',
     '😴 حتى القدّاحة عم تتثاوب',
     '🕯️ ولا إشي منيح بيندمج بعد الساعة 1',
@@ -150,7 +151,7 @@ const NIGHT: Record<Lang, readonly string[]> = {
     '🌚 إنت تبع بكرا رح يراجع هالكود… ارحمه',
   ],
   he: [
-    '🌙 השעה {time}, אחי. אפילו הבאגים הלכו לישון.',
+    '🍁 השעה {time}, אחי. אפילו הבאגים הלכו לישון.',
     '🦉 אחרי חצות ערים רק ינשופים ותורנים',
     '😴 אפילו המצית מפהק',
     '🕯️ שום דבר טוב לא עולה למיין אחרי אחת בלילה',
