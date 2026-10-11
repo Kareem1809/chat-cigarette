@@ -1,4 +1,5 @@
 import { expect, mock, test } from 'claude-code/testing'
+import { tagline, warnings } from '../hooks/words'
 
 // ضهر يوم عادي — عشان وضع آخر الليل ما يتدخّل بالاختبارات القديمة.
 const NOON = new Date(2026, 9, 11, 12, 0).getTime()
@@ -175,14 +176,18 @@ test('/smokear turns the words Arabic and /smokeen turns them back', async ($, o
   expect(await term.find({ type: 'Text', text: /ولّعنا السيجارة/ })).toBeDefined()
   expect(await term.find({ type: 'Text', text: 'حدّ الـ5 ساعات' })).toBeDefined()
   await term.unmount()
-  // بالديسكتوب: الجملة جوّا الرسمة من اليمين، والعدّاد كلامه معزول (الأرقام ما بتنقلب) وصفّه من اليمين.
+  // بالديسكتوب: الجملة سطر تحت الرسمة (مش جوّاها — كريم)، لازقة باليمين ومعزولة عشان الأرقام ما تنقلب،
+  // والعدّادات صفّها من اليمين. الرسمة بحجمها الطبيعي: الشريط مش لازق عاليمين.
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
   const art = svgSource(await desk.drawn())
   expect(art).toContain('سيجارة المحادثة')
-  expect(art).toMatch(/<tspan direction="rtl" unicode-bidi="embed">🔥 ولّعنا السيجارة/)
-  expect(await desk.find({ type: 'Text', text: /ولّعنا السيجارة/ })).toBeUndefined()
+  expect(art).not.toContain('ولّعنا السيجارة')
+  expect(await desk.find({ type: 'Text', text: '\u2067🔥 ولّعنا السيجارة — كل رسالة منك نَفَس\u2069' })).toBeDefined()
   expect(await desk.find({ type: 'Text', text: '\u2067حدّ الـ5 ساعات\u2069' })).toBeDefined()
-  expect(JSON.stringify(await desk.drawn())).toContain('"flexDirection":"row-reverse"')
+  const tree = JSON.stringify(await desk.drawn())
+  expect(tree).toContain('"flexDirection":"row-reverse"')
+  expect(tree).toContain('"justifyContent":"flex-end"')
+  expect(tree).not.toContain('"alignItems":"flex-end"')
   await desk.unmount()
 
   expect((await run('smokeen')).text).toContain('English')
@@ -214,7 +219,8 @@ test('/smokehe turns the words Hebrew', async ($, on) => {
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
   const art = svgSource(await desk.drawn())
   expect(art).toContain('סיגריית השיחה')
-  expect(art).toMatch(/<tspan direction="rtl" unicode-bidi="embed">🔥 הדלקנו סיגריה/)
+  expect(art).not.toContain('הדלקנו סיגריה')
+  expect(await desk.find({ type: 'Text', text: /^\u2067🔥 הדלקנו סיגריה/ })).toBeDefined()
   expect(await desk.find({ type: 'Text', text: '\u2067מגבלת 5 השעות\u2069' })).toBeDefined()
   await desk.unmount()
 })
@@ -415,6 +421,9 @@ test('all sixty warnings live in the drawing, 20 seconds each, and cycle by them
   const source = svgSource(await ui.drawn())
   expect(source.split("WARNING:").length - 1).toBe(60)
   expect(source).toContain('attributeName="opacity" dur="1200s"')
+  // المخفيين مخفيين فعلاً، عشان النسخ ياخد التحذير اللي مبيّن بس (كريم: «كلهن رح ينتسخن»).
+  expect(source.split('attributeName="visibility"').length - 1).toBe(60)
+  expect(source.split('visibility="hidden"').length - 1).toBe(59)
   await ui.unmount()
 })
 
@@ -629,4 +638,46 @@ test('there are hundreds of status lines per language, so they rarely repeat', a
     await ui.unmount()
   }
   expect(seen.size).toBeGreaterThanOrEqual(18)
+})
+
+test('a line with the time twice shows it twice — never a raw {time}', async ($, on) => {
+  mock.clock(on, { now: at(3, 1) })
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  for (let i = 0; i < 19; i++) {
+    await $.prompt.submit({ text: `m ${i}`, wait: false, origin: { kind: 'composer' } })
+    const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+    for (const t of await ui.findAll({ type: 'Text' })) expect(t.text ?? '').not.toContain('{time}')
+    await ui.unmount()
+  }
+  for (let seed = 0; seed < 60; seed++) {
+    for (const ln of ['en', 'ar', 'he'] as const) {
+      expect(tagline('cigarette', ln, 5, at(3, 1), seed)).not.toContain('{time}')
+    }
+  }
+})
+
+test('Arabic and Hebrew lines and warnings carry no English letters (they flip when mixed)', async () => {
+  for (const ln of ['ar', 'he'] as const) {
+    for (const kind of ['cigarette', 'joint'] as const) {
+      for (const w of warnings(kind, ln, 0)) expect(w).not.toMatch(/[A-Za-z]/)
+      for (let seed = 0; seed < 400; seed++) {
+        for (const now of [NOON, at(2, 14)]) {
+          for (let p = 1; p < 20; p++) expect(tagline(kind, ln, p, now, seed)).not.toMatch(/[A-Za-z]/)
+        }
+      }
+    }
+  }
+})
+
+test('a million-token window reads 1M, not 1000k', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  on('session.measure', ($, e) => ({ changed: e.changed }))
+  await $.session.measure({
+    context: { tokens: 225000, window: 1000000, percent: 22 },
+    rateLimits: [],
+    changed: ['context'],
+  })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: 'Context · 225k of 1M' })).toBeDefined()
+  await ui.unmount()
 })

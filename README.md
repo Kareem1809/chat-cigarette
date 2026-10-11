@@ -73,7 +73,7 @@ claude plugin validate .
 بيعدّد كل إشي المود بيستعمله: `$.clock`, `$.command.register`, `$.env.get` (OS), `$.session.usage`, `$.state`, `$.store`, `$.ui.resolve`, `$.ui.toast`. ما في `$.http` ولا `$.process` ولا `$.fs`.
 
 - **Desktop app:** an animated SVG. On **Windows** it is a still image, because the animated version reloads on every change and blinks out for a moment there.
-- **Arabic and Hebrew:** on desktop the line is drawn inside the card, right to left, and the meter rows run right to left (icon on the right, numbers kept in place).
+- **Arabic and Hebrew:** on desktop the line under the drawing and the meter rows run right to left (icon on the right, numbers kept in place), and the lines carry no English letters, so nothing flips. Only the warning on screen gets copied, not all sixty.
 - **Terminal never scrolls:** the card fits the rows Claude gives it; the least important rows step aside.
 - **Terminal:** a framed card: title and puff count, a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~` (or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`) with the ashtray `╰▁▂▃▂▁╯▬▬ ×2` at the end, the warning as a full reverse-video bar `⚠ WARNING: …`, the line, and the meters.
 - **Joint:** unbleached, RAW-style rolling paper (no specks) and a tip that says RAW.

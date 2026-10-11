@@ -118,7 +118,8 @@ function sign(): string {
 }
 
 // شريط أبيض بإطار أسود متل تحذيرات الباكيت الحقيقية. بالرسمة المتحركة كل التحذيرات
-// جوّاته وبيتبدّلوا لحالهم كل 5 ثواني (بلا إعادة تحميل)؛ بالصورة الثابتة بيبيّن الأول بس.
+// جوّاته وبيتبدّلوا لحالهم كل 20 ثانية (بلا إعادة تحميل)؛ بالصورة الثابتة بيبيّن الأول بس.
+// المخفيين مخفيين فعلاً (visibility)، مش بس شفّافين — غير هيك النسخ بياخدهم كلهم (كريم).
 function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): string {
   // الجملة بالنص، ومثلث أحمر واحد لازق بكلمة التحذير (كريم).
   const rtl = ln !== 'en'
@@ -139,13 +140,24 @@ function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): st
       const b = ((i + 1) / n).toFixed(4)
       const ae = (i / n + Number(e)).toFixed(4)
       const be = ((i + 1) / n - Number(e)).toFixed(4)
+      const back = (1 - Number(e)).toFixed(4)
       const anim =
         i === 0
-          ? `values="1;1;0;0;1" keyTimes="0;${be};${b};${(1 - Number(e)).toFixed(4)};1"`
+          ? `values="1;1;0;0;1" keyTimes="0;${be};${b};${back};1"`
           : i === n - 1
             ? `values="0;0;1;1;0" keyTimes="0;${a};${ae};${be};1"`
             : `values="0;0;1;1;0;0" keyTimes="0;${a};${ae};${be};${b};1"`
-      return `<text ${attrs} opacity="${i === 0 ? 1 : 0}">${body}<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" ${anim}/></text>`
+      const shown =
+        i === 0
+          ? `values="visible;hidden;visible" keyTimes="0;${b};${back}"`
+          : i === n - 1
+            ? `values="hidden;visible" keyTimes="0;${a}"`
+            : `values="hidden;visible;hidden" keyTimes="0;${a};${b}"`
+      return (
+        `<text ${attrs} opacity="${i === 0 ? 1 : 0}"${i === 0 ? '' : ' visibility="hidden"'}>${body}` +
+        `<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" ${anim}/>` +
+        `<animate attributeName="visibility" calcMode="discrete" dur="${T}s" repeatCount="indefinite" ${shown}/></text>`
+      )
     })
     .join('\n')
   return `<rect x="16" y="9" width="568" height="25" rx="2" fill="#f6f3ec" stroke="#0b0b0b" stroke-width="2.5"/>
@@ -373,21 +385,12 @@ export type Scene = {
   isUnlit: boolean
   stats: string
   animated: boolean
-  // عربي/عبري: جملة هالنَّفَس بتنرسم جوّا الكرت (برّاه كانت تطلع مخربطة: الأرقام بتنقلب والكلام عالشمال).
-  line?: string
 }
 
 export function scene(s: Scene): string {
   const f = Math.min(1, s.puffs / PUFFS)
   if (f >= 1) return burnedOut(s)
-  const line = s.line ? rtlLine(s.line) : ''
-  return frame(line ? 166 : 142, f) + warningStrip(s.warnings, s.ln, s.animated) + `<g transform="translate(0 30)">${burning(s, f)}</g>${line}</svg>`
-}
-
-// الجملة بالنص تحت السيجارة: قطعة من اليمين لليسار جوّا سطر عادي (متل التحذير).
-// مش لازقة باليمين: «end» مع كتابة من اليمين بينقلب بالمتصفح والجملة بتطلع برّا الكرت.
-function rtlLine(text: string): string {
-  return `<text x="300" y="152" text-anchor="middle" font-family="${FONT}" font-size="13" font-weight="700" fill="#ece6ff"><tspan direction="rtl" unicode-bidi="embed">${esc(text)}</tspan></text>`
+  return frame(142, f) + warningStrip(s.warnings, s.ln, s.animated) + `<g transform="translate(0 30)">${burning(s, f)}</g></svg>`
 }
 
 function burning(s: Scene, f: number): string {

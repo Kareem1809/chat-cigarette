@@ -355,15 +355,14 @@ export const register: Register = on => {
           </Box>
         )
       }
-      // بالعربي والعبري جملة النَّفَس جوّا الرسمة (خط عربي صح ومن اليمين)؛ بس جملة «خلصت» بتضل هون.
-      const lineInArt = rtl && !isOut
-      const rows = lineInArt
-        ? []
-        : [
-            <Text key="tag" bold color={isOut ? '#b9a6ff' : undefined} wrap="truncate">
-              {say(line)}
-            </Text>,
-          ]
+      // الجملة سطر تحت الرسمة (كريم: «بدي الكتابة تحت مش بالصورة»)؛ بالعربي والعبري لازقة باليمين.
+      const rows = [
+        <Box key="tag" flexDirection="row" justifyContent={rtl ? 'flex-end' : 'flex-start'}>
+          <Text bold color={isOut ? '#b9a6ff' : undefined} wrap="truncate">
+            {say(line)}
+          </Text>
+        </Box>,
+      ]
       if (ms.length > 0) {
         if (oneLine) {
           rows.push(
@@ -384,7 +383,8 @@ export const register: Register = on => {
         )
       }
       return (
-        <Box flexDirection="column" alignItems={rtl ? 'flex-end' : undefined}>
+        // الرسمة بتتمدّد عالعرض كله متل دايماً — لزق الشريط كله عاليمين صغّرها (كريم: «بدي حجمه طبيعي»).
+        <Box flexDirection="column">
           <Svg
             source={scene({
               kind,
@@ -395,7 +395,6 @@ export const register: Register = on => {
               isUnlit,
               stats: card,
               animated: !isWindows,
-              line: lineInArt ? line : undefined,
             })}
             alt={
               isOut
