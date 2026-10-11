@@ -171,14 +171,18 @@ test('/smokear turns the words Arabic and /smokeen turns them back', async ($, o
   const run = (command: string) =>
     $.command.run({ command, args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
   expect((await run('smokear')).text).toContain('بالعربي')
-  for (const surface of ['terminal', 'desktop'] as const) {
-    const ui = await $.ui.mount({ ...BAND, surface })
-    expect(await ui.find({ type: 'Text', text: /ولّعنا السيجارة/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: 'حدّ الـ5 ساعات' })).toBeDefined()
-    await ui.unmount()
-  }
+  const term = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await term.find({ type: 'Text', text: /ولّعنا السيجارة/ })).toBeDefined()
+  expect(await term.find({ type: 'Text', text: 'حدّ الـ5 ساعات' })).toBeDefined()
+  await term.unmount()
+  // بالديسكتوب: الجملة جوّا الرسمة من اليمين، والعدّاد كلامه معزول (الأرقام ما بتنقلب) وصفّه من اليمين.
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
-  expect(JSON.stringify(await desk.drawn())).toContain('سيجارة المحادثة')
+  const art = svgSource(await desk.drawn())
+  expect(art).toContain('سيجارة المحادثة')
+  expect(art).toMatch(/<tspan direction="rtl" unicode-bidi="embed">🔥 ولّعنا السيجارة/)
+  expect(await desk.find({ type: 'Text', text: /ولّعنا السيجارة/ })).toBeUndefined()
+  expect(await desk.find({ type: 'Text', text: '\u2067حدّ الـ5 ساعات\u2069' })).toBeDefined()
+  expect(JSON.stringify(await desk.drawn())).toContain('"flexDirection":"row-reverse"')
   await desk.unmount()
 
   expect((await run('smokeen')).text).toContain('English')
@@ -203,14 +207,15 @@ test('/smokehe turns the words Hebrew', async ($, on) => {
     presentation: { isFullscreen: false, columns: 80 },
   })
   expect(r.text).toContain('בעברית')
-  for (const surface of ['terminal', 'desktop'] as const) {
-    const ui = await $.ui.mount({ ...BAND, surface })
-    expect(await ui.find({ type: 'Text', text: /הדלקנו סיגריה/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: 'מגבלת 5 השעות' })).toBeDefined()
-    await ui.unmount()
-  }
+  const term = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await term.find({ type: 'Text', text: /הדלקנו סיגריה/ })).toBeDefined()
+  expect(await term.find({ type: 'Text', text: 'מגבלת 5 השעות' })).toBeDefined()
+  await term.unmount()
   const desk = await $.ui.mount({ ...BAND, surface: 'desktop' })
-  expect(JSON.stringify(await desk.drawn())).toContain('סיגריית השיחה')
+  const art = svgSource(await desk.drawn())
+  expect(art).toContain('סיגריית השיחה')
+  expect(art).toMatch(/<tspan direction="rtl" unicode-bidi="embed">🔥 הדלקנו סיגריה/)
+  expect(await desk.find({ type: 'Text', text: '\u2067מגבלת 5 השעות\u2069' })).toBeDefined()
   await desk.unmount()
 })
 
@@ -398,7 +403,7 @@ test('around 4am a new cigarette will not light, and the message still goes thro
   await ui.unmount()
 })
 
-test('all thirty warnings live in the drawing and cycle by themselves; a still image shows one', async ($, on) => {
+test('all sixty warnings live in the drawing, 20 seconds each, and cycle by themselves; a still image shows one', async ($, on) => {
   mock.clock(on, { now: NOON })
   mock.store(on)
   mock.env(on, {})
@@ -408,8 +413,8 @@ test('all thirty warnings live in the drawing and cycle by themselves; a still i
   await $.session.start({ cwd: '/tmp', surface: 'desktop', isInteractive: true })
   const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
   const source = svgSource(await ui.drawn())
-  expect(source.split('WARNING:').length - 1).toBe(30)
-  expect(source).toContain('attributeName="opacity" dur="150s"')
+  expect(source.split("WARNING:").length - 1).toBe(60)
+  expect(source).toContain('attributeName="opacity" dur="1200s"')
   await ui.unmount()
 })
 
@@ -611,7 +616,7 @@ test('the chill sign-off line changes every puff (from a pool of 30, in all thre
   }
 })
 
-test('there are a hundred status lines per language, so they rarely repeat', async ($, on) => {
+test('there are hundreds of status lines per language, so they rarely repeat', async ($, on) => {
   mock.clock(on, { now: NOON })
   on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
   const seen = new Set<string>()

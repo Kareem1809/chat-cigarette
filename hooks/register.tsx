@@ -193,7 +193,6 @@ export const register: Register = on => {
       $.command.register({ name: 'smokear', description: 'Chat cigarette in Arabic — بالعربي', immediate: true }),
       $.command.register({ name: 'smokehe', description: 'Chat cigarette in Hebrew — בעברית', immediate: true }),
       $.command.register({ name: 'smokeen', description: 'Chat cigarette in English', immediate: true }),
-      $.command.register({ name: 'smokeng', description: 'Chat cigarette in English (same as /smokeen)', immediate: true }),
     ])
     return next(e)
   })
@@ -206,7 +205,7 @@ export const register: Register = on => {
     return { text: SAID[want][ln] }
   })
 
-  on('command.run', { command: ['smokear', 'smokehe', 'smokeen', 'smokeng'] }, async ($, e) => {
+  on('command.run', { command: ['smokear', 'smokehe', 'smokeen'] }, async ($, e) => {
     const want: Lang = e.command === 'smokear' ? 'ar' : e.command === 'smokehe' ? 'he' : 'en'
     await update($, lang, () => want)
     await $.store.set('lang', want)
@@ -335,29 +334,40 @@ export const register: Register = on => {
       // الرسمة بحجمها الطبيعي (تصغيرها حسب maxRows صغّرها لنص بالماك — كريم 0.9.2).
       // بس بلا فراغ، والعدّادين بسطر واحد إذا في عرض، عشان الشريط يضل قصير قد ما بنقدر.
       const oneLine = e.props.bodyColumns >= 110
+      // عربي/عبري (كريم: «الكتابة بالعربي مش مرتّبة»): كل سطر من اليمين لليسار — الأيقونة يمين،
+      // الشريط بيتعبّى من اليمين، والكلام معزول بعلامات اتجاه عشان الأرقام ما تنقلب ولا تهرب لطرف تاني.
+      const rtl = ln !== 'en'
+      const row = rtl ? 'row-reverse' : 'row'
+      const say = (t: string) => (rtl ? `\u2067${t}\u2069` : t)
       const meterRow = (m: Meter) => {
         const b = meterBar(m.pct)
         return (
-          <Box key={m.key} flexDirection="row" gap={1}>
+          <Box key={m.key} flexDirection={row} gap={1}>
             <Text>{m.icon}</Text>
-            <Box flexDirection="row">
+            <Box flexDirection={row}>
               <Text color={m.color}>{b.used}</Text>
               <Text dimColor>{b.left}</Text>
             </Box>
-            <Text bold color={m.color}>{b.label}</Text>
-            <Text dimColor>{m.text}</Text>
+            <Text bold color={m.color}>{rtl ? b.label.trim() : b.label}</Text>
+            <Text dimColor wrap={rtl ? 'truncate' : undefined}>
+              {say(m.text)}
+            </Text>
           </Box>
         )
       }
-      const rows = [
-        <Text key="tag" bold color={isOut ? '#b9a6ff' : undefined} wrap="truncate">
-          {line}
-        </Text>,
-      ]
+      // بالعربي والعبري جملة النَّفَس جوّا الرسمة (خط عربي صح ومن اليمين)؛ بس جملة «خلصت» بتضل هون.
+      const lineInArt = rtl && !isOut
+      const rows = lineInArt
+        ? []
+        : [
+            <Text key="tag" bold color={isOut ? '#b9a6ff' : undefined} wrap="truncate">
+              {say(line)}
+            </Text>,
+          ]
       if (ms.length > 0) {
         if (oneLine) {
           rows.push(
-            <Box key="meters" flexDirection="row" gap={3}>
+            <Box key="meters" flexDirection={row} gap={3}>
               {ms.map(meterRow)}
             </Box>,
           )
@@ -367,16 +377,26 @@ export const register: Register = on => {
       }
       if (isOut) {
         rows.push(
-          <Box key="share" flexDirection="row" gap={1}>
-            <Text dimColor>{SHARE[ln]}</Text>
+          <Box key="share" flexDirection={row} gap={1}>
+            <Text dimColor>{say(SHARE[ln])}</Text>
             <Text color="#bdb2e0">{INSTALL}</Text>
           </Box>,
         )
       }
       return (
-        <Box flexDirection="column">
+        <Box flexDirection="column" alignItems={rtl ? 'flex-end' : undefined}>
           <Svg
-            source={scene({ kind, ln, puffs: s.puffs, warnings: warns, butts: day.butts, isUnlit, stats: card, animated: !isWindows })}
+            source={scene({
+              kind,
+              ln,
+              puffs: s.puffs,
+              warnings: warns,
+              butts: day.butts,
+              isUnlit,
+              stats: card,
+              animated: !isWindows,
+              line: lineInArt ? line : undefined,
+            })}
             alt={
               isOut
                 ? `Chat ${noun} burned out — ${REST_LINE} — ${card}`

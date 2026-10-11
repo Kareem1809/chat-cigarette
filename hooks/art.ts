@@ -125,7 +125,8 @@ function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): st
   const attrs = `x="300" y="25.6" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#0b0b0b"`
   const list = animated ? texts : texts.slice(0, 1)
   const n = list.length
-  const each = 5
+  // كل تحذير بيضل 20 ثانية قبل ما يتبدّل (كريم 11/10).
+  const each = 20
   const T = n * each
   const e = (0.35 / T).toFixed(4)
   const lines = list
@@ -372,12 +373,21 @@ export type Scene = {
   isUnlit: boolean
   stats: string
   animated: boolean
+  // عربي/عبري: جملة هالنَّفَس بتنرسم جوّا الكرت (برّاه كانت تطلع مخربطة: الأرقام بتنقلب والكلام عالشمال).
+  line?: string
 }
 
 export function scene(s: Scene): string {
   const f = Math.min(1, s.puffs / PUFFS)
   if (f >= 1) return burnedOut(s)
-  return frame(142, f) + warningStrip(s.warnings, s.ln, s.animated) + `<g transform="translate(0 30)">${burning(s, f)}</g></svg>`
+  const line = s.line ? rtlLine(s.line) : ''
+  return frame(line ? 166 : 142, f) + warningStrip(s.warnings, s.ln, s.animated) + `<g transform="translate(0 30)">${burning(s, f)}</g>${line}</svg>`
+}
+
+// الجملة بالنص تحت السيجارة: قطعة من اليمين لليسار جوّا سطر عادي (متل التحذير).
+// مش لازقة باليمين: «end» مع كتابة من اليمين بينقلب بالمتصفح والجملة بتطلع برّا الكرت.
+function rtlLine(text: string): string {
+  return `<text x="300" y="152" text-anchor="middle" font-family="${FONT}" font-size="13" font-weight="700" fill="#ece6ff"><tspan direction="rtl" unicode-bidi="embed">${esc(text)}</tspan></text>`
 }
 
 function burning(s: Scene, f: number): string {

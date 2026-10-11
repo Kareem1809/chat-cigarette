@@ -37,8 +37,8 @@ claude plugin update chat-cigarette@chat-cigarette
 | | |
 |---|---|
 | 🔥 كل رسالة = نَفَس | 20 نَفَس بالسيجارة. الإشعارات ورسائل البرامج ما بتنحسب |
-| ⚠️ تحذير الباكيت | شريط أبيض بإطار أسود متل الباكيت الحقيقي، والجملة بالنص ومثلث أحمر ⚠️ لازق بكلمة التحذير. 30 تحذير بكل لغة جوّا الرسمة، وبيتبدّلوا **لحالهم** كل 5 ثواني («WARNING: Your manager can smell this commit») |
-| 💬 جملة جديدة | **100 جملة بكل لغة**: بالأول خفيفة، بالنص «قوم تحرّك»، بالآخر «جهّز حالك ترتاح». كل سيجارة بتبلّش من مكان جديد، عشان ما تزهق |
+| ⚠️ تحذير الباكيت | شريط أبيض بإطار أسود متل الباكيت الحقيقي، والجملة بالنص ومثلث أحمر ⚠️ لازق بكلمة التحذير. 60 تحذير بكل لغة (و72 للجوينت) جوّا الرسمة، وكل واحد بيضل 20 ثانية وبعدين بيتبدّل **لحاله** («WARNING: Your manager can smell this commit») |
+| 💬 جملة جديدة | **250 جملة بكل لغة** (280 للجوينت)، أغلبها نكت عن الكود وكلود والبرومبتات والسهر («🤖 “You’re absolutely right!” — Claude, before fixing it»). بالأول خفيفة، بالنص «إنت غرقان»، بالآخر «جهّز حالك ترتاح». كل سيجارة بتبلّش من مكان جديد، عشان ما تزهق |
 | 🌆 السما | بتبلّش غروب وبتغمق لليل مع كل نَفَس |
 | 🧺 المكتة | مكتة زجاج (منفضة) بآخر السيجارة، بتلات مطارح عالحافة: كومة الرماد فيها بتكبر مع **كل سحبة**، وذرّات رماد بتوقع من الجمرة. وكل سيجارة بتخلص بتترك عقب بيضل لآخر اليوم (اليوم بيبلّش 5 الصبح) |
 | 📸 كرت المشاركة | لما تخلص: «It's time to get some rest»، أرقام اليوم (أعقاب · نَفَسات · الحدّ)، كل أعقاب اليوم بالمنفضة، وسطر التركيب. كل صورة شاشة بتصير دعاية |
@@ -46,7 +46,7 @@ claude plugin update chat-cigarette@chat-cigarette
 | ⏳ حدّ الـ5 ساعات | `⏳ ━━━━━━──────── 42%  5-hour limit · resets in 2h 15m` |
 | 📦 باكيت جديد | لما الحدّ يخلص: «Out of smokes — new pack in 1h 40m». ولما يتجدد: إشعار «New pack's here» |
 | 🧠 الكونتكست | `🧠 ━━━─────────── 23%  Context · 46k of 200k`. فوق الـ80% بيذكّرك بـ `/clear` (بتجيك معه سيجارة جديدة) |
-| 🍁 آخر الليل | بعد 12 بالليل الجمل بتمسخر عليك مع الساعة («It's 2:14am. Even your bugs went to sleep.»). ومن 4 لـ5 الصبح سيجارة جديدة ما بتولّع. هاد بالرسمة بس، ورسالتك بتروح عادي |
+| 🍁 آخر الليل | بعد 12 بالليل الجمل بتمسخر عليك مع الساعة — 42 نكتة («It's 2:14am. Even your bugs went to sleep.»). ومن 4 لـ5 الصبح سيجارة جديدة ما بتولّع. هاد بالرسمة بس، ورسالتك بتروح عادي |
 | 🍁 آخر نَفَس | كلود بيجاوبك عادي وبيختم بـ «It's time to get some rest 🍁»، وبيطلعلك إشعار |
 | 📦 وحدة كمان؟ | بعد «روح ارتاح»، الرسالة الجاية بتولّع سيجارة جديدة من الباكيت (أو بتلفّ جوينت جديد): «📦 Fresh one from the pack — #2 today». العقب القديم بيضل بالمكتة |
 | 🎬 حركات | سيجارة جديدة بتطلع من الباكيت والقدّاحة بتولّعها · الجوينت بينلفّ وبعدين بيولع · لما تخلص العقب بينزل عالمكتة وبينطفى مع شرار ودخان |
@@ -73,7 +73,8 @@ claude plugin validate .
 بيعدّد كل إشي المود بيستعمله: `$.clock`, `$.command.register`, `$.env.get` (OS), `$.session.usage`, `$.state`, `$.store`, `$.ui.resolve`, `$.ui.toast`. ما في `$.http` ولا `$.process` ولا `$.fs`.
 
 - **Desktop app:** an animated SVG. On **Windows** it is a still image, because the animated version reloads on every change and blinks out for a moment there.
-- **Never scrolls:** the band sizes itself to the rows Claude gives it (Windows often gives fewer) — the drawing shrinks on desktop, the least important rows step aside in the terminal.
+- **Arabic and Hebrew:** on desktop the line is drawn inside the card, right to left, and the meter rows run right to left (icon on the right, numbers kept in place).
+- **Terminal never scrolls:** the card fits the rows Claude gives it; the least important rows step aside.
 - **Terminal:** a framed card: title and puff count, a coloured text cigarette `▐▓▓▓▓▌██████▌▒░ ~` (or joint `▐≋≋≋▃▄▅▆▇▌▒░ ~`) with the ashtray `╰▁▂▃▂▁╯▬▬ ×2` at the end, the warning as a full reverse-video bar `⚠ WARNING: …`, the line, and the meters.
 - **Joint:** unbleached, RAW-style rolling paper (no specks) and a tip that says RAW.
 
