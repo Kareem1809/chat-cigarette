@@ -420,10 +420,29 @@ test('all sixty warnings live in the drawing, 20 seconds each, and cycle by them
   const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
   const source = svgSource(await ui.drawn())
   expect(source.split("WARNING:").length - 1).toBe(60)
-  expect(source).toContain('attributeName="opacity" dur="1200s"')
+  expect(source).toContain('id="warnCycle" attributeName="visibility" to="visible" begin="0s;warnCycle.end" dur="1200s"')
   // المخفيين مخفيين فعلاً، عشان النسخ ياخد التحذير اللي مبيّن بس (كريم: «كلهن رح ينتسخن»).
-  expect(source.split('attributeName="visibility"').length - 1).toBe(60)
+  expect(source.split('<set attributeName="visibility"').length - 1).toBe(60)
   expect(source.split('visibility="hidden"').length - 1).toBe(59)
+  await ui.unmount()
+})
+
+// كريم 11/10 («لي الحاسوب سخن؟»): ولا حركة بتلف للأبد — كانت رسم كلود ياكل نواة كاملة طول الوقت.
+test('nothing in the drawing animates forever (it heated the Mac)', async ($, on) => {
+  mock.clock(on, { now: NOON })
+  mock.store(on)
+  mock.env(on, {})
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('command.register', () => ({ value: undefined }) as never)
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  await $.session.start({ cwd: '/tmp', surface: 'desktop', isInteractive: true })
+  await $.prompt.submit({ text: 'hi', wait: false, origin: { kind: 'composer' } })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  const source = svgSource(await ui.drawn())
+  expect(source).toContain('repeatDur=')
+  expect(source).not.toContain('indefinite')
+  // كل حركة بتتكرّر لازم يكون إلها آخر (repeatDur)؛ <animate> بلا آخر = رسم كل فريم.
+  expect(source.split('<animate').length - 1).toBeGreaterThan(0)
   await ui.unmount()
 })
 

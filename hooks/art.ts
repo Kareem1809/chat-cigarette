@@ -11,6 +11,15 @@ function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
+// الحركات اللي بتلف بلا نهاية خلّت رسم كلود ياكل أكتر من نواة كاملة طول الوقت والماك يسخن
+// (كريم 11/10). هلّق كل حركة بتلف أول LIVE ثانية بعد كل رسالة، وبتوقف على لقطة حلوة:
+// at = وين بالدورة بتوقف (0.5 = بالنص). ممنوع ترجع repeatCount="indefinite".
+const LIVE = 12
+function loop(dur: number, at = 0.5): string {
+  const n = Math.ceil(LIVE / dur)
+  return `repeatDur="${((n + at) * dur).toFixed(2)}s" fill="freeze"`
+}
+
 // ───────────── الخلفية ─────────────
 
 // النجوم بتبيّن أكتر كل ما الليل ينزل (night من 0 لـ1).
@@ -30,17 +39,19 @@ function stars(night: number, h: number): string {
   return pts
     .map(
       ([x, y, r, b]) =>
-        `<circle cx="${x}" cy="${((y ?? 0) * h).toFixed(1)}" r="${r}" fill="#fff7d6"><animate attributeName="opacity" values=".1;${peak};.1" dur="3.2s" begin="${b}s" repeatCount="indefinite"/></circle>`,
+        `<circle cx="${x}" cy="${((y ?? 0) * h).toFixed(1)}" r="${r}" fill="#fff7d6"><animate attributeName="opacity" values=".1;${peak};.1" dur="3.2s" begin="${b}s" ${loop(3.2)}/></circle>`,
     )
     .join('')
 }
 
 function wisp(x: number, y: number, begin: number, dur: number, width: number, sway: number): string {
+  // كل خيط دخان بيوقف بنقطة غير التاني، فالدخان الواقف بيضل مفروش مش فوق بعضه.
+  const stop = 0.3 + 0.4 * ((begin / dur) % 1)
   return (
     `<path d="M ${x.toFixed(1)} ${y.toFixed(1)} c ${-8 * sway} -6 ${8 * sway} -12 0 -18 s ${-8 * sway} -12 2 -18 s 6 -10 -2 -14" ` +
     `stroke-width="${width}" opacity="0">` +
-    `<animate attributeName="opacity" values="0;.6;0" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/>` +
-    `<animateTransform attributeName="transform" type="translate" values="0 8; ${3 * sway} -12" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/>` +
+    `<animate attributeName="opacity" values="0;.6;0" dur="${dur}s" begin="${begin}s" ${loop(dur, stop)}/>` +
+    `<animateTransform attributeName="transform" type="translate" values="0 8; ${3 * sway} -12" dur="${dur}s" begin="${begin}s" ${loop(dur, stop)}/>` +
     `</path>`
   )
 }
@@ -49,9 +60,9 @@ function wisp(x: number, y: number, begin: number, dur: number, width: number, s
 function leaf(x: number, y: number, size: number, begin: number, dur: number): string {
   return (
     `<g transform="translate(${x} ${y})"><g>` +
-    `<animateTransform attributeName="transform" type="translate" values="0 -4; 3 4; 0 -4" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/>` +
+    `<animateTransform attributeName="transform" type="translate" values="0 -4; 3 4; 0 -4" dur="${dur}s" begin="${begin}s" ${loop(dur)}/>` +
     `<text text-anchor="middle" dominant-baseline="central" font-size="${size}">🍁` +
-    `<animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="${dur / 2}s" begin="${begin}s" repeatCount="indefinite"/>` +
+    `<animateTransform attributeName="transform" type="rotate" values="-14;14;-14" dur="${dur / 2}s" begin="${begin}s" ${loop(dur / 2, 0.25)}/>` +
     `</text></g></g>`
   )
 }
@@ -129,39 +140,25 @@ function warningStrip(texts: readonly string[], ln: Lang, animated: boolean): st
   // كل تحذير بيضل 20 ثانية قبل ما يتبدّل (كريم 11/10).
   const each = 20
   const T = n * each
-  const e = (0.35 / T).toFixed(4)
+  // التبديل بـ<set> مش <animate>: الـset بيصحّي الرسم مرة كل 20 ثانية بس، والـanimate
+  // (حتى لو discrete) بيرسم كل فريم بلا نهاية — هاد كان جزء من سخونة الماك (11/10).
+  // ساعة وحدة (warnCycle) بتعيد حالها كل T، وكل تحذير بيبيّن بدوره نسبةً إلها.
   const lines = list
     .map((t, i) => {
       const words = rtl ? `<tspan direction="rtl" unicode-bidi="embed">${esc(t)}</tspan>` : esc(t)
       // إنجليزي: المثلث قبل WARNING (يسار) · عربي/عبري: بعد «تحذير»/«אזהרה» (يمين).
       const body = rtl ? `${words} ${sign()}` : `${sign()}${words}`
       if (n === 1) return `<text ${attrs}>${body}</text>`
-      const a = (i / n).toFixed(4)
-      const b = ((i + 1) / n).toFixed(4)
-      const ae = (i / n + Number(e)).toFixed(4)
-      const be = ((i + 1) / n - Number(e)).toFixed(4)
-      const back = (1 - Number(e)).toFixed(4)
-      const anim =
+      const swap =
         i === 0
-          ? `values="1;1;0;0;1" keyTimes="0;${be};${b};${back};1"`
-          : i === n - 1
-            ? `values="0;0;1;1;0" keyTimes="0;${a};${ae};${be};1"`
-            : `values="0;0;1;1;0;0" keyTimes="0;${a};${ae};${be};${b};1"`
-      const shown =
-        i === 0
-          ? `values="visible;hidden;visible" keyTimes="0;${b};${back}"`
-          : i === n - 1
-            ? `values="hidden;visible" keyTimes="0;${a}"`
-            : `values="hidden;visible;hidden" keyTimes="0;${a};${b}"`
-      return (
-        `<text ${attrs} opacity="${i === 0 ? 1 : 0}"${i === 0 ? '' : ' visibility="hidden"'}>${body}` +
-        `<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" ${anim}/>` +
-        `<animate attributeName="visibility" calcMode="discrete" dur="${T}s" repeatCount="indefinite" ${shown}/></text>`
-      )
+          ? `<set attributeName="visibility" to="hidden" begin="warnCycle.begin+${each}s" dur="${T - each}s"/>`
+          : `<set attributeName="visibility" to="visible" begin="warnCycle.begin+${i * each}s" dur="${each}s"/>`
+      return `<text ${attrs}${i === 0 ? '' : ' visibility="hidden"'}>${body}${swap}</text>`
     })
     .join('\n')
+  const clock = n > 1 ? `<g><set id="warnCycle" attributeName="visibility" to="visible" begin="0s;warnCycle.end" dur="${T}s"/></g>` : ''
   return `<rect x="16" y="9" width="568" height="25" rx="2" fill="#f6f3ec" stroke="#0b0b0b" stroke-width="2.5"/>
-${lines}`
+${clock}${lines}`
 }
 
 // ───────────── السيجارة والجوينت ─────────────
@@ -170,14 +167,14 @@ ${lines}`
 function tip(end: number, cy: number, hh: number, isJoint: boolean): string {
   const y0 = cy - hh
   const h = hh * 2
-  const pulse = '2.2s'
+  const pulse = 2.2
   return `
-<circle cx="${end + 4}" cy="${cy}" r="${hh * 2}" fill="url(#glow)" filter="url(#soft)" opacity=".7"><animate attributeName="opacity" values=".45;.95;.45" dur="${pulse}" repeatCount="indefinite"/></circle>
+<circle cx="${end + 4}" cy="${cy}" r="${hh * 2}" fill="url(#glow)" filter="url(#soft)" opacity=".7"><animate attributeName="opacity" values=".45;.95;.45" dur="${pulse}s" ${loop(pulse)}/></circle>
 <path d="M ${end + 4} ${y0 + 1} L ${end + 18} ${y0 + 2} L ${end + 21} ${(y0 + h * 0.3).toFixed(1)} L ${end + 19} ${cy} L ${end + 22} ${(y0 + h * 0.75).toFixed(1)} L ${end + 17} ${y0 + h - 1} L ${end + 4} ${y0 + h - 1} Z" fill="url(#${isJoint ? 'jointAsh' : 'ash'})"/>
 ${isJoint ? '' : `<circle cx="${end + 10}" cy="${cy - hh / 3}" r="1" fill="#3d3833"/><circle cx="${end + 14}" cy="${cy + hh / 2.4}" r="1.1" fill="#3d3833"/>`}
-<rect x="${end - 2}" y="${y0}" width="7" height="${h}" fill="#ff5a14"><animate attributeName="fill" values="#ff5a14;#ffb347;#ff5a14" dur="${pulse}" repeatCount="indefinite"/></rect>
-<circle cx="${end + 6}" cy="${cy - hh / 2}" r="1.2" fill="#ffcf6b"><animate attributeName="opacity" values="0;1;0" dur="${pulse}" repeatCount="indefinite"/></circle>
-<circle cx="${end + 6}" cy="${cy + hh / 1.7}" r="1" fill="#ffcf6b"><animate attributeName="opacity" values="1;0;1" dur="${pulse}" repeatCount="indefinite"/></circle>`
+<rect x="${end - 2}" y="${y0}" width="7" height="${h}" fill="#ff5a14"><animate attributeName="fill" values="#ff5a14;#ffb347;#ff5a14" dur="${pulse}s" ${loop(pulse)}/></rect>
+<circle cx="${end + 6}" cy="${cy - hh / 2}" r="1.2" fill="#ffcf6b"><animate attributeName="opacity" values="0;1;0" dur="${pulse}s" ${loop(pulse)}/></circle>
+<circle cx="${end + 6}" cy="${cy + hh / 1.7}" r="1" fill="#ffcf6b"><animate attributeName="opacity" values="1;0;1" dur="${pulse}s" ${loop(pulse)}/></circle>`
 }
 
 // طرف ما ولّع (4 الصبح): تبغ/عشبة باينة، بلا جمرة ولا دخان.
@@ -282,7 +279,7 @@ ${buttShape('cigarette', x - 7, y - 0.5, -18, 0.45)}<text x="${x + 7}" y="${y + 
 function lighter(x: number, y: number): string {
   return `<g opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.12;.75;1" begin=".8s" dur="1.1s" fill="freeze"/>
 <rect x="${x - 7}" y="${y + 9}" width="15" height="26" rx="3" fill="#d23a2e"/><rect x="${x - 7}" y="${y + 4}" width="15" height="6" rx="1.5" fill="#c9c9cf"/>
-<path d="M ${x} ${y + 4} c -5 -4 -4 -10 0 -16 c 4 6 5 12 0 16 z" fill="url(#flame)"><animateTransform attributeName="transform" type="scale" values="1 1;1 1.12;1 .95;1 1.08" dur=".25s" repeatCount="indefinite" additive="sum"/></path></g>`
+<path d="M ${x} ${y + 4} c -5 -4 -4 -10 0 -16 c 4 6 5 12 0 16 z" fill="url(#flame)"><animateTransform attributeName="transform" type="scale" values="1 1;1 1.12;1 .95;1 1.08" dur=".25s" repeatDur="2s" additive="sum"/></path></g>`
 }
 
 // شرار ونفخة دخان لما العقب ينطفى بالمكتة.
@@ -350,8 +347,8 @@ function fallingAsh(fromX: number, fromY: number): string {
   const dx = Math.max(0, Math.min(52, 528 - fromX)).toFixed(1)
   const dy = (fromX > 440 ? 78 - fromY : 20).toFixed(1)
   return `<circle cx="${fromX.toFixed(1)}" cy="${fromY.toFixed(1)}" r="1.4" fill="#b9b3aa" opacity="0">
-<animate attributeName="opacity" values="0;.9;.9;0" keyTimes="0;.1;.85;1" dur="4.2s" begin="1s" repeatCount="indefinite"/>
-<animateTransform attributeName="transform" type="translate" values="0 0; ${(Number(dx) * 0.35).toFixed(1)} ${(Number(dy) * 0.15).toFixed(1)}; ${dx} ${dy}" keyTimes="0;.45;1" dur="4.2s" begin="1s" repeatCount="indefinite"/></circle>`
+<animate attributeName="opacity" values="0;.9;.9;0" keyTimes="0;.1;.85;1" dur="4.2s" begin="1s" ${loop(4.2, 1)}/>
+<animateTransform attributeName="transform" type="translate" values="0 0; ${(Number(dx) * 0.35).toFixed(1)} ${(Number(dy) * 0.15).toFixed(1)}; ${dx} ${dy}" keyTimes="0;.45;1" dur="4.2s" begin="1s" ${loop(4.2, 1)}/></circle>`
 }
 
 // المنفضة الكبيرة بكرت المشاركة: أعقاب اليوم كلها مفروشة فيها.
@@ -437,7 +434,7 @@ function burning(s: Scene, f: number): string {
     const x = (28 + i * step).toFixed(1)
     if (i < s.puffs) {
       const isLast = i === s.puffs - 1
-      dots += `<circle cx="${x}" cy="94" r="3.2" fill="#ff8a3d">${isLast ? '<animate attributeName="r" values="3.2;4.4;3.2" dur="1.6s" repeatCount="indefinite"/>' : ''}</circle>`
+      dots += `<circle cx="${x}" cy="94" r="3.2" fill="#ff8a3d">${isLast ? '<animate attributeName="r" values="3.2;4.4;3.2" dur="1.6s" ${loop(1.6, 1)}/>' : ''}</circle>`
     } else {
       dots += `<circle cx="${x}" cy="94" r="3" fill="none" stroke="#5d4f86" stroke-width="1.2"/>`
     }
@@ -482,8 +479,8 @@ function burnedOut(s: Scene): string {
 ${leaf(548, 40, 30, 0, 5)}
 ${leaf(66, 34, 16, 1.6, 6.5)}
 ${leaf(536, 146, 13, 3.1, 7)}
-<text x="508" y="30" font-family="${FONT}" font-size="11" font-weight="700" fill="#c8b6ff">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 6; -4 -6" dur="2.4s" repeatCount="indefinite"/></text>
-<text x="494" y="22" font-family="${FONT}" font-size="8" font-weight="700" fill="#c8b6ff">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="1.2s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 6; -4 -6" dur="2.4s" begin="1.2s" repeatCount="indefinite"/></text>
+<text x="508" y="30" font-family="${FONT}" font-size="11" font-weight="700" fill="#c8b6ff">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" ${loop(2.4)}/><animateTransform attributeName="transform" type="translate" values="0 6; -4 -6" dur="2.4s" ${loop(2.4)}/></text>
+<text x="494" y="22" font-family="${FONT}" font-size="8" font-weight="700" fill="#c8b6ff">z<animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="1.2s" ${loop(2.4)}/><animateTransform attributeName="transform" type="translate" values="0 6; -4 -6" dur="2.4s" begin="1.2s" ${loop(2.4)}/></text>
 <text x="300" y="46" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="25" fill="url(#night)">${esc(REST_LINE.replace(/\s*🍁$/, ''))}</text>
 <text x="300" y="74" text-anchor="middle"${dir} font-family="${FONT}" font-size="11" font-weight="700" letter-spacing="${s.ln === 'en' ? 1.6 : 0}" fill="#c8b6ff">${esc(s.stats)}</text>
 ${bigTray(s.butts, s.animated)}
